@@ -41,6 +41,7 @@ img{max-width:100%}
 @media(max-width:640px){body{padding:16px!important}body>div,main.w-full.max-w-md{padding:22px!important;border-radius:22px!important}}
 </style>
 
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body class="min-h-screen flex items-center justify-center p-4 bg-[#CFCFCF]">
@@ -112,7 +113,7 @@ img{max-width:100%}
       id="totalPrice"
       class="font-semibold"
     >
-      💰 Total: R$ 0,00
+      <i data-lucide="wallet" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>Total: R$ 0,00
     </p>
   
     <p
@@ -279,10 +280,11 @@ async function carregarAddons() {
     const span =
       document.createElement("span");
 
-    span.innerText =
-      `📌 ${addon.name} (+R$${Number(addon.price).toFixed(2)})`;
+    span.innerHTML =
+      `<i data-lucide="plus-circle" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>${String(addon.name).replace(/[&<>"]/g, "")} (+R$${Number(addon.price).toFixed(2)})`;
 
     label.appendChild(checkbox);
+    if (window.lucide) window.lucide.createIcons({ root: label });
 
     label.appendChild(span);
 
@@ -334,7 +336,7 @@ function calcularDuracaoTotal() {
   document.getElementById(
     "totalPrice"
   ).innerText =
-    `💰 Total: R$ ${totalPrice.toFixed(2)}`;
+    `Total: R$ ${totalPrice.toFixed(2)}`;
 
   document.getElementById(
     "totalDuration"
