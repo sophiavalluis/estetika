@@ -3,123 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Studio</title>
-
+  <meta name="theme-color" content="#faf7f6">
+  <title>Meu Studio | Estétika</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#29242a;--muted:#89818a;--line:#eee8eb;--rose:#c77f98;--rose-dark:#a95f7b;--paper:#fff;--canvas:#faf7f8}
+    *{box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--ink)}
+    h1,h2,h3,.display{font-family:'Manrope',sans-serif;letter-spacing:-.035em}
+    .ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;background:radial-gradient(ellipse at 8% 5%,rgba(235,196,210,.28),transparent 36%),radial-gradient(ellipse at 95% 38%,rgba(225,213,226,.32),transparent 35%)}
+    .ambient:after{content:"";position:absolute;inset:0;opacity:.22;background-image:radial-gradient(#c9aab7 .7px,transparent .7px);background-size:24px 24px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+    .shell{max-width:1080px;margin:auto;position:relative;z-index:1;padding:38px 22px 64px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+    .brandmark{display:flex;align-items:center;gap:11px;font:800 15px Manrope,sans-serif;letter-spacing:-.04em}
+    .brandicon{width:36px;height:36px;border-radius:13px;background:#302a31;color:white;display:grid;place-items:center;box-shadow:0 6px 16px #302a3122}
+    .eyebrow{font-size:10px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--rose-dark)}
+    .page-title{font-size:clamp(27px,4vw,38px);font-weight:800;line-height:1.12;margin:8px 0 7px}
+    .subtle{color:var(--muted);font-size:13px;line-height:1.6}
+    .surface{background:rgba(255,255,255,.88);border:1px solid rgba(235,227,231,.9);border-radius:23px;box-shadow:0 12px 40px rgba(54,35,46,.045)}
+    .hero{padding:28px;display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;position:relative;overflow:hidden}
+    .hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:12%;top:-155px;background:#f7e8ee;pointer-events:none}
+    .profile-row{display:flex;align-items:center;gap:20px;min-width:0;position:relative;z-index:1}
+    #preview{width:94px;height:94px;border-radius:26px;object-fit:cover;border:4px solid white;box-shadow:0 8px 24px #3c29351c;background:#f3e8ed}
+    #studioTitle{font-size:25px;font-weight:800;margin:0 0 5px;overflow-wrap:anywhere}
+    .profile-caption{font-size:12px;color:var(--muted)}
+    .action-row{display:flex;flex-wrap:wrap;gap:9px;position:relative;z-index:1}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:13px;padding:12px 16px;font-size:12px;font-weight:700;transition:.2s ease;border:1px solid transparent;cursor:pointer}
+    .btn:hover{transform:translateY(-1px);filter:brightness(.98)}
+    .btn-primary{background:var(--rose);color:white;box-shadow:0 7px 16px #c77f982b}
+    .btn-dark{background:#302a31;color:white}
+    .btn-soft{background:#fff;border-color:var(--line);color:#514951}
+    .btn-quiet{background:#f8f3f5;color:#66545e}
+    .link-panel{margin-top:18px;padding:17px 19px;display:flex;align-items:center;justify-content:space-between;gap:15px;background:#fff9fb;border:1px solid #f0e2e8;border-radius:17px}
+    .link-value{font-size:12px;color:#936276;overflow-wrap:anywhere;margin-top:5px}
+    .section-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .section-card{padding:24px}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}
+    .section-title{font-size:17px;font-weight:800;margin:0 0 5px}
+    .section-icon{width:38px;height:38px;display:grid;place-items:center;background:#f9eef2;color:var(--rose-dark);border-radius:13px;flex:none}
+    .field-label{display:block;font-size:11px;font-weight:700;color:#615761;margin:0 0 8px}
+    .field{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 13px;font:500 13px 'DM Sans';color:var(--ink);outline:none;transition:.2s}
+    .field:focus{border-color:#d6a0b3;box-shadow:0 0 0 3px #f7eaf0}
+    .field-block{margin-bottom:15px}
+    input[type=file].field{padding:11px;height:auto;font-size:11px}
+    input[type=color]{padding:5px;cursor:pointer}
+    .hint{font-size:10px;color:#a198a0;margin-top:6px}
+    .divider{height:1px;background:var(--line);margin:20px 0}
+    #availabilityList{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    #availabilityList>div{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff}
+    #availabilityList b{font:700 12px Manrope;color:#403740}
+    #availabilityList label{font-size:10px;color:#827982}
+    #availabilityList input[type=time]{min-width:0;width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 5px;font:500 11px 'DM Sans';background:#fcfafb}
+    #availabilityList input[type=checkbox]{accent-color:var(--rose)}
+    #msg{font-size:12px;color:#6e9b7b}
+    .status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:99px;background:#f4f7f3;color:#71896d;font-size:10px;font-weight:700}
+    @media(max-width:700px){.shell{padding:24px 14px 42px}.hero{grid-template-columns:1fr;padding:21px}.action-row{display:grid;grid-template-columns:1fr 1fr}.action-row .btn{padding:12px 9px}.section-grid{grid-template-columns:1fr}.section-card{padding:20px}.link-panel{align-items:flex-start;flex-direction:column}.link-panel .btn{width:100%}}
+    @media(max-width:390px){#availabilityList{grid-template-columns:1fr}.profile-row{gap:13px}#preview{width:76px;height:76px;border-radius:21px}#studioTitle{font-size:21px}}
+  </style>
 </head>
+<body class="min-h-screen">
+<div class="ambient"></div>\n<div id="backgroundBlur" class="hidden" aria-hidden="true"></div>
+<main class="shell">
+  <header class="topbar">
+    <div class="brandmark"><span class="brandicon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10 5.5 4 10 7h4l4.5-3 1.5 6v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 13h.01M16 13h.01M9 17c1.8 1.2 4.2 1.2 6 0"/></svg></span>estétika</div>
+    <span class="status-pill"><span style="width:6px;height:6px;border-radius:50%;background:#91ad88"></span> Área do studio</span>
+  </header>
 
-<body
-  id="body"
-  class="min-h-[100dvh] p-3 sm:p-4 overflow-x-hidden relative overflow-y-auto bg-[#CFCFCF]"
->
+  <div class="mb-6">
+    <div class="eyebrow">Seu espaço, sua identidade</div>
+    <h1 class="page-title">Perfil do studio</h1>
+    <p class="subtle">Gerencie sua presença, seus horários e a experiência das suas clientes.</p>
+  </div>
 
-<!-- BACKGROUND -->
-<div
-  id="backgroundBlur"
-  class="fixed inset-0 bg-cover bg-center scale-110 blur-2xl brightness-50"
-></div>
-
-<div class="max-w-md mx-auto relative z-10">
-
-  <!-- CARD PRINCIPAL -->
-  <div class="bg-white rounded-3xl shadow-xl p-6">
-
-    <img
-      id="preview"
-      src="https://placehold.co/120x120/png"
-      class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-[#696969] shadow"
-    >
-
-    <h1 id="studioTitle" class="text-2xl font-bold text-center mt-4 text-gray-800">
-      Meu Studio
-    </h1>
-
-    <div id="publicLink" class="bg-pink-50 text-center p-3 rounded-2xl mt-4 text-sm"></div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
-
-      <button id="copiar" class="text-white p-3 rounded-2xl font-bold">
-        Copiar Link
-      </button>
-
-      <button id="abrirAgenda"
-        class="bg-white border border-[#696969] text-[#A9A9A9] p-3 rounded-2xl font-bold hover:bg-pink-50">
-        Agendamento Manual
-      </button>
-
-      <button onclick="window.location.href='painel.html'"
-        class="bg-white border border-[#696969] text-[#A9A9A9] p-3 rounded-2xl font-bold hover:bg-pink-50">
-        Painel
-      </button>
-
-      <button onclick="window.location.href='servicos.html'"
-        class="bg-white border border-[#696969] text-[#A9A9A9] p-3 rounded-2xl font-bold hover:bg-pink-50">
-        Serviços
-      </button>
-
-      <button id="editarBtn"
-        class="col-span-2 bg-gray-100 text-gray-700 p-3 rounded-2xl font-bold hover:bg-gray-200">
-        Editar Perfil
-      </button>
-
+  <section class="surface hero">
+    <div class="profile-row">
+      <img id="preview" src="https://placehold.co/120x120/png" alt="Logo do studio">
+      <div class="min-w-0">
+        <div class="eyebrow mb-2">Bem-vinda ao seu espaço</div>
+        <h2 id="studioTitle">Meu Studio</h2>
+        <div class="profile-caption">Seu perfil profissional no Estétika</div>
+      </div>
     </div>
-  </div>
-
-  <!-- EDIT -->
-  <div id="editCard" class="bg-white rounded-3xl shadow-xl p-6 mt-5 hidden">
-
-    <h2 class="text-xl font-bold mb-4">Editar Perfil ✨</h2>
-
-    <input id="studio" placeholder="Nome do Studio" class="w-full mb-3 p-3 border rounded-2xl">
-    <input id="username" placeholder="Seu link" class="w-full mb-3 p-3 border rounded-2xl">
-
-    <label class="text-sm font-semibold">Logo:</label>
-    <input type="file" id="logoFile" class="w-full mb-3" accept="image/*">
-
-    <label class="text-sm font-semibold">Tema:</label>
-    <input type="color" id="themeColor" class="w-full h-12 mb-3 border rounded-2xl">
-
-    <label class="text-sm font-semibold">Fundo:</label>
-    <input type="file" id="backgroundFile" class="w-full mb-3" accept="image/*">
-
-    <button id="salvar" class="w-full text-white p-3 rounded-2xl font-bold">
-      Salvar
-    </button>
-
-    <p id="msg" class="text-center text-sm mt-3"></p>
-  </div>
-
-  <!-- DISPONIBILIDADE -->
-  <div class="bg-white rounded-3xl shadow-xl p-6 mt-5">
-
-    <h2 class="text-xl font-bold mb-5">Disponibilidade 📅</h2>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-
-      <input type="number" id="capacity" min="1" value="1" class="p-3 border rounded-xl">
-
-      <select id="slotInterval" class="p-3 border rounded-xl">
-        <option value="15">15 min</option>
-        <option value="30">30 min</option>
-        <option value="60">1 hora</option>
-      </select>
-
+    <div class="action-row">
+      <button id="editarBtn" class="btn btn-primary"><span>✦</span> Editar perfil</button>
+      <button id="abrirAgenda" class="btn btn-soft"><span>↗</span> Ver agendamento</button>
+      <button onclick="window.location.href='painel.html'" class="btn btn-soft">Painel</button>
+      <button onclick="window.location.href='servicos.html'" class="btn btn-soft">Serviços</button>
     </div>
+    <div class="link-panel" style="grid-column:1/-1">
+      <div class="min-w-0"><div class="eyebrow">Seu link de agendamento</div><div id="publicLink" class="link-value">Carregando link...</div></div>
+      <button id="copiar" class="btn btn-dark">▣ &nbsp; Copiar link</button>
+    </div>
+  </section>
 
-    <button id="saveSettings"
-      class="w-full mb-6 bg-purple-500 text-white p-3 rounded-2xl font-bold">
-      Salvar Configurações
-    </button>
+  <section id="editCard" class="surface section-card mt-[18px] hidden">
+    <div class="section-head">
+      <div><div class="eyebrow mb-2">Personalização</div><h2 class="section-title">Identidade do studio</h2><p class="subtle">Deixe sua página com a sua cara.</p></div>
+      <div class="section-icon">✦</div>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-x-5">
+      <div class="field-block"><label class="field-label" for="studio">Nome do studio</label><input id="studio" placeholder="Ex.: Studio Bella" class="field"></div>
+      <div class="field-block"><label class="field-label" for="username">Link personalizado</label><input id="username" placeholder="seu-studio" class="field"><p class="hint">Esse nome identifica seu link público.</p></div>
+      <div class="field-block"><label class="field-label" for="logoFile">Logo ou foto do studio</label><input type="file" id="logoFile" class="field" accept="image/*"></div>
+      <div class="field-block"><label class="field-label" for="themeColor">Cor de destaque</label><input type="color" id="themeColor" class="field"></div>
+      <div class="field-block sm:col-span-2"><label class="field-label" for="backgroundFile">Imagem de fundo</label><input type="file" id="backgroundFile" class="field" accept="image/*"><p class="hint">Escolha uma imagem que represente a identidade do seu studio.</p></div>
+    </div>
+    <div class="divider"></div>
+    <div class="flex flex-wrap items-center justify-between gap-3"><p id="msg" class="m-0"></p><button id="salvar" class="btn btn-primary min-w-[150px]">Salvar alterações</button></div>
+  </section>
 
-    <div id="availabilityList" class="space-y-4"></div>
-
+  <div class="section-grid">
+    <section class="surface section-card">
+      <div class="section-head">
+        <div><div class="eyebrow mb-2">Organização da agenda</div><h2 class="section-title">Capacidade e duração</h2><p class="subtle">Defina como seus horários serão distribuídos.</p></div>
+        <div class="section-icon">◷</div>
+      </div>
+      <div class="field-block"><label class="field-label" for="capacity">Atendimentos simultâneos</label><input type="number" id="capacity" min="1" value="1" class="field"></div>
+      <div class="field-block"><label class="field-label" for="slotInterval">Intervalo entre horários</label><select id="slotInterval" class="field"><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option></select></div>
+      <button id="saveSettings" class="btn btn-dark w-full mt-2">Salvar configurações</button>
+    </section>
+    <section class="surface section-card">
+      <div class="section-head">
+        <div><div class="eyebrow mb-2">Disponibilidade semanal</div><h2 class="section-title">Seus horários</h2><p class="subtle">Escolha em quais dias e períodos você atende.</p></div>
+        <div class="section-icon">▦</div>
+      </div>
+      <div id="availabilityList" class="space-y-3"></div>
+    </section>
   </div>
-
-</div>
+  <footer class="text-center subtle mt-8">Estétika <span class="mx-1">·</span> Seu talento, sua agenda, sua essência.</footer>
+</main>
 
 <script>
-
 document.addEventListener("DOMContentLoaded", async () => {
 
   const supabase = window.supabase.createClient(
@@ -373,8 +391,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadAvailability();
 
 });
-
 </script>
-
 </body>
 </html>
