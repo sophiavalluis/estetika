@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="flex flex-col gap-2 mt-4">
 
             <button
-              onclick='verDetalhes(${JSON.stringify(item)})'
+              data-action="ver-detalhes"
               class="
                 w-full
                 bg-[#696969]
@@ -323,6 +323,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
       `;
+
+      const botaoDetalhes = div.querySelector('[data-action="ver-detalhes"]');
+      if (botaoDetalhes) {
+        botaoDetalhes.addEventListener("click", () => {
+          window.verDetalhes(item);
+        });
+      }
 
       lista.appendChild(div);
 
@@ -391,180 +398,137 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   };
 // 👁️ VER DETALHES
-window.verDetalhes = function(item) {
+function escaparHTML(valor) {
+  return String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-  const modal =
-    document.createElement("div");
+function normalizarFotos(fotos) {
+  if (!fotos) return [];
+
+  let listaFotos = fotos;
+
+  if (typeof listaFotos === "string") {
+    const texto = listaFotos.trim();
+    if (!texto) return [];
+
+    try {
+      listaFotos = JSON.parse(texto);
+    } catch {
+      // Também aceita uma única URL salva como texto.
+      listaFotos = [texto];
+    }
+  }
+
+  if (!Array.isArray(listaFotos)) {
+    listaFotos = [listaFotos];
+  }
+
+  return listaFotos
+    .map(foto => {
+      if (typeof foto === "string") return foto.trim();
+      if (foto && typeof foto === "object") {
+        return String(foto.url || foto.publicUrl || foto.public_url || "").trim();
+      }
+      return "";
+    })
+    .filter(url => /^https?:\/\//i.test(url));
+}
+
+window.verDetalhes = function(item) {
+  if (!item || typeof item !== "object") {
+    console.error("Não foi possível abrir os detalhes do agendamento:", item);
+    return;
+  }
+
+  const fotos = normalizarFotos(item.photo_urls);
+  const modal = document.createElement("div");
 
   modal.className = `
-    fixed
-    inset-0
-    bg-black/70
-    backdrop-blur-sm
-    flex
-    items-center
-    justify-center
-    z-50
-    p-4
+    fixed inset-0 bg-black/70 backdrop-blur-sm
+    flex items-center justify-center z-50 p-4
   `;
 
+  const nome = escaparHTML(item.name || "Cliente");
+  const servico = escaparHTML(item.service || "Não informado");
+  const telefone = escaparHTML(item.phone || "Não informado");
+  const data = escaparHTML(item.date || "Não informada");
+  const horario = escaparHTML(item.time || "Não informado");
+  const descricao = escaparHTML(item.description || "");
+
   modal.innerHTML = `
-
     <div class="
-      bg-white
-      w-full
-      max-w-2xl
-      rounded-3xl
-      p-6
-      shadow-2xl
-      relative
-      max-h-[90vh]
-      overflow-y-auto
+      bg-white w-full max-w-2xl rounded-3xl p-6 shadow-2xl
+      relative max-h-[90vh] overflow-y-auto
     ">
-
       <button
         id="fecharModal"
-        class="
-          absolute
-          top-4
-          right-4
-          text-2xl
-          text-gray-500
-          hover:text-black
-        "
-      >
-        ✕
-      </button>
+        type="button"
+        aria-label="Fechar detalhes"
+        class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black"
+      >✕</button>
 
-      <h2 class="text-2xl font-bold mb-4">
-        ${item.name}
-      </h2>
+      <h2 class="text-2xl font-bold mb-5 pr-8 text-gray-900">${nome}</h2>
 
-      <div class="space-y-2 mb-5">
-
-        <p>
-          <b>Serviço:</b>
-          ${item.service}
-        </p>
-
-        <p>
-          <b>Telefone:</b>
-          ${item.phone}
-        </p>
-
-        <p>
-          <b>Data:</b>
-          ${item.date}
-        </p>
-
-        <p>
-          <b>Horário:</b>
-          ${item.time}
-        </p>
-
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+        <div class="rounded-2xl bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500">Serviço</p>
+          <p class="font-semibold text-gray-800 mt-1">${servico}</p>
+        </div>
+        <div class="rounded-2xl bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500">Telefone</p>
+          <p class="font-semibold text-gray-800 mt-1">${telefone}</p>
+        </div>
+        <div class="rounded-2xl bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500">Data</p>
+          <p class="font-semibold text-gray-800 mt-1">${data}</p>
+        </div>
+        <div class="rounded-2xl bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500">Horário</p>
+          <p class="font-semibold text-gray-800 mt-1">${horario}</p>
+        </div>
       </div>
 
-      ${
-        item.description
-          ? `
-            <div class="mb-6">
-              <h3 class="font-bold text-lg mb-2">
-                Descrição
-              </h3>
+      ${descricao ? `
+        <div class="mb-6">
+          <h3 class="font-bold text-lg mb-2 text-gray-900">Descrição</h3>
+          <div class="bg-gray-50 border border-gray-100 p-4 rounded-2xl text-gray-700 whitespace-pre-wrap">${descricao}</div>
+        </div>
+      ` : ""}
 
-              <div class="
-                bg-gray-100
-                p-4
-                rounded-2xl
-                text-gray-700
-                whitespace-pre-wrap
-              ">
-                ${item.description}
-              </div>
-            </div>
-          `
-          : ""
-      }
-
-      ${
-        item.photo_urls &&
-        item.photo_urls.length > 0
-
-          ? `
-
-          <div>
-
-            <h3 class="font-bold text-lg mb-3">
-              Fotos
-            </h3>
-
-            <div class="
-              grid
-              grid-cols-2
-              gap-4
-            ">
-
-              ${item.photo_urls.map(url => `
-
-                <a
-                  href="${url}"
-                  target="_blank"
-                >
-
-                  <img
-                    src="${url}"
-                    class="
-                      w-full
-                      h-52
-                      object-cover
-                      rounded-2xl
-                      hover:scale-[1.02]
-                      transition
-                      shadow-md
-                    "
-                  >
-
-                </a>
-
-              `).join("")}
-
-            </div>
-
+      <div class="mb-2">
+        <h3 class="font-bold text-lg mb-3 text-gray-900">Fotos ${fotos.length ? `(${fotos.length})` : ""}</h3>
+        ${fotos.length ? `
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            ${fotos.map((url, index) => `
+              <a href="${escaparHTML(url)}" target="_blank" rel="noopener noreferrer"
+                 class="block overflow-hidden rounded-2xl bg-gray-100">
+                <img src="${escaparHTML(url)}" alt="Foto ${index + 1} do agendamento"
+                     loading="lazy"
+                     class="w-full h-40 sm:h-48 object-cover hover:scale-105 transition"
+                     onerror="this.closest('a').style.display='none'">
+              </a>
+            `).join("")}
           </div>
-
-        `
-          : `
-            <p class="text-gray-400">
-              Nenhuma foto enviada
-            </p>
-          `
-      }
-
+        ` : `
+          <p class="text-sm text-gray-400 bg-gray-50 rounded-2xl p-4">Nenhuma foto enviada.</p>
+        `}
+      </div>
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  document
-    .getElementById("fecharModal")
-    .onclick = () => {
-
-      modal.remove();
-
-    };
-
-  modal.onclick = (e) => {
-
-    if (e.target === modal) {
-
-      modal.remove();
-
-    }
-
-  };
-
+  modal.querySelector("#fecharModal").addEventListener("click", () => modal.remove());
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
 };
-  
+
   // 🚀 INICIAR
   atualizarBotoesAtivos();
 
