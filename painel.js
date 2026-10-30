@@ -75,55 +75,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   }
 
-  // 🎯 BOTÕES ATIVOS
   function atualizarBotoesAtivos() {
-
-    const botoes = [
-      "booked",
-      "done",
-      "cancelled"
-    ];
-
-    botoes.forEach(status => {
-
-      const btn =
-        document.getElementById(`btn-${status}`);
-
-      if (!btn) return;
-
-      // ✅ ATIVO
-      if (status === statusAtual) {
-
-        btn.classList.remove(
-          "bg-white",
-          "text-gray-700"
-        );
-
-        btn.classList.add(
-          "bg-[#696969]",
-          "text-white",
-          "shadow-lg",
-          "scale-105"
-        );
-
-      } else {
-
-        btn.classList.remove(
-          "bg-[#696969]",
-          "text-white",
-          "shadow-lg",
-          "scale-105"
-        );
-
-        btn.classList.add(
-          "bg-white",
-          "text-gray-700"
-        );
-
-      }
-
+    ["booked", "done", "cancelled"].forEach(status => {
+      const btn = document.getElementById(`btn-${status}`);
+      if (btn) btn.classList.toggle("active", status === statusAtual);
     });
+  }
 
+  function renderizarIcones(container = document) {
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons({ root: container });
+    }
   }
 
   // 📥 CARREGAR AGENDAMENTOS
@@ -134,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         Carregando...
       </div>
     `;
+    renderizarIcones(lista);
 
     // 🔍 QUERY
     let query =
@@ -183,6 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       `;
 
+      renderizarIcones(lista);
       return;
     }
 
@@ -195,6 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       `;
 
+      renderizarIcones(lista);
       return;
     }
 
@@ -233,96 +198,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         transition
       `;
 
+      const nomeSeguro = escaparHTML(item.name || "Cliente");
+      const servicoSeguro = escaparHTML(item.service || "Serviço não informado");
+      const dataSegura = escaparHTML(item.date || "Data não informada");
+      const horarioSeguro = escaparHTML(item.time || "--:--");
+      const statusLabel = item.status === "done" ? "Concluído" : item.status === "cancelled" ? "Cancelado" : "Agendado";
+      const statusIcon = item.status === "done" ? "check-circle-2" : item.status === "cancelled" ? "calendar-x" : "clock-3";
+      const statusColor = item.status === "done" ? "bg-emerald-50 text-emerald-700 border-emerald-100" : item.status === "cancelled" ? "bg-rose-50 text-rose-700 border-rose-100" : "bg-[#f8f0f3] text-[#a56780] border-[#f0dfe6]";
+
+      div.className = "appointment surface rounded-[24px] p-5 md:p-6 border border-[#eee7eb]";
       div.innerHTML = `
-
-        <div class="flex items-center justify-between">
-
-          <div>
-
-            <h2 class="font-bold text-lg text-gray-800">
-              ${item.name}
-            </h2>
-
-            <p class="text-gray-600 mt-1">
-              🏷 ${item.service}
-            </p>
-
-            <p class="text-sm text-gray-500 mt-1">
-              📅 ${item.date} às ${item.time}
-            </p>
-
+        <div class="flex items-start justify-between gap-3 mb-5">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase tracking-[.18em] font-bold text-[#b17a90] mb-2">ATENDIMENTO</p>
+            <h2 class="font-extrabold text-xl text-[#302a30] truncate">${nomeSeguro}</h2>
+            <p class="text-sm text-[#817780] mt-1">${servicoSeguro}</p>
           </div>
-
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 rounded-full border ${statusColor} whitespace-nowrap">
+            <i data-lucide="${statusIcon}" class="icon icon-sm"></i>${statusLabel}
+          </span>
         </div>
-
-        ${
-          item.status === "booked" ||
-          item.status === null
-
-            ? `
-
-          <div class="flex flex-col gap-2 mt-4">
-
-            <button
-              data-action="ver-detalhes"
-              class="
-                w-full
-                bg-[#696969]
-                hover:bg-black
-                text-white
-                py-2
-                rounded-2xl
-                font-semibold
-                transition
-              "
-            >
-              Ver detalhes
-            </button>
-          
-            <div class="flex gap-2">
-          
-              <button
-                onclick="concluir(${item.id})"
-                class="
-                  flex-1
-                  bg-green-500
-                  hover:bg-green-600
-                  text-white
-                  py-2
-                  rounded-2xl
-                  font-semibold
-                  transition
-                "
-              >
-                Concluir
-              </button>
-          
-              <button
-                onclick="cancelar(${item.id})"
-                class="
-                  flex-1
-                  bg-red-500
-                  hover:bg-red-600
-                  text-white
-                  py-2
-                  rounded-2xl
-                  font-semibold
-                  transition
-                "
-              >
-                Cancelar
-              </button>
-          
-            </div>
-          
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div class="rounded-2xl bg-[#faf7f8] border border-[#f1eaee] p-3.5">
+            <p class="text-[10px] uppercase tracking-wider text-[#a0969e] font-bold mb-1.5">Data</p>
+            <p class="text-sm font-semibold text-[#514850] flex items-center gap-2"><i data-lucide="calendar-days" class="icon icon-sm text-[#b17a90]"></i>${dataSegura}</p>
           </div>
-
-        `
-            : ""
-
-        }
-
+          <div class="rounded-2xl bg-[#faf7f8] border border-[#f1eaee] p-3.5">
+            <p class="text-[10px] uppercase tracking-wider text-[#a0969e] font-bold mb-1.5">Horário</p>
+            <p class="text-sm font-semibold text-[#514850] flex items-center gap-2"><i data-lucide="clock-3" class="icon icon-sm text-[#b17a90]"></i>${horarioSeguro}</p>
+          </div>
+        </div>
+        ${item.status === "booked" || item.status === null ? `
+          <div class="flex flex-col gap-2">
+            <button data-action="ver-detalhes" class="action soft w-full"><i data-lucide="eye" class="icon"></i>Ver detalhes</button>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="concluir(${Number(item.id)})" class="action w-full bg-emerald-600 hover:bg-emerald-700 text-white"><i data-lucide="check" class="icon"></i>Concluir</button>
+              <button onclick="cancelar(${Number(item.id)})" class="action w-full bg-white border border-rose-200 text-rose-700 hover:bg-rose-50"><i data-lucide="x" class="icon"></i>Cancelar</button>
+            </div>
+          </div>
+        ` : `<button data-action="ver-detalhes" class="action soft w-full"><i data-lucide="eye" class="icon"></i>Ver detalhes</button>`}
       `;
+      renderizarIcones(div);
 
       const botaoDetalhes = div.querySelector('[data-action="ver-detalhes"]');
       if (botaoDetalhes) {
@@ -470,7 +386,7 @@ window.verDetalhes = function(item) {
         type="button"
         aria-label="Fechar detalhes"
         class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black"
-      >✕</button>
+      ><i data-lucide="x" class="icon"></i></button>
 
       <h2 class="text-2xl font-bold mb-5 pr-8 text-gray-900">${nome}</h2>
 
@@ -522,6 +438,7 @@ window.verDetalhes = function(item) {
   `;
 
   document.body.appendChild(modal);
+  if (window.lucide) window.lucide.createIcons({ root: modal });
 
   modal.querySelector("#fecharModal").addEventListener("click", () => modal.remove());
   modal.addEventListener("click", (e) => {
