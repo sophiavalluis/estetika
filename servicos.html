@@ -49,6 +49,7 @@ img{max-width:100%}
 @media(max-width:640px){body{padding:16px!important}body>div,main.w-full.max-w-md{padding:22px!important;border-radius:22px!important}}
 </style>
 
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body class="bg-[#CFCFCF] min-h-screen p-6">
@@ -300,7 +301,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </h2>
 
           <p class="text-[#696969] mt-1">
-            💰 R$${Number(servico.price).toFixed(2)}
+            <i data-lucide="wallet" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>R$${Number(servico.price).toFixed(2)}
           </p>
 
           <p class="text-[#808080] text-sm">
@@ -333,7 +334,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     whitespace-pre-wrap
                     mb-3
                   ">
-                    📋 ${servico.description}
+                    <i data-lucide="file-text" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> ${servico.description}
                   </p>
           
                   <button
@@ -426,6 +427,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
 
       lista.appendChild(div);
+      if (window.lucide) window.lucide.createIcons({ root: div });
 
     });
 
@@ -501,7 +503,7 @@ async function carregarAddons() {
         </h2>
     
         <p class="text-[#696969] mt-1">
-          💰 R$${Number(addon.price).toFixed(2)}
+          <i data-lucide="wallet" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>R$${Number(addon.price).toFixed(2)}
         </p>
     
         <p class="text-[#808080] text-sm">
