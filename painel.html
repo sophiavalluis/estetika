@@ -9,13 +9,45 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>
-    Painel
-  </title>
+  <title>Painel profissional | Estétika</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#29242a;--muted:#89818a;--line:#eee8eb;--rose:#c77f98;--rose-dark:#a95f7b;--paper:#fff;--canvas:#faf7f8}
+*{box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif!important;background:radial-gradient(ellipse at 8% 5%,rgba(235,196,210,.28),transparent 36%),radial-gradient(ellipse at 95% 38%,rgba(225,213,226,.32),transparent 35%),var(--canvas)!important;color:var(--ink)!important}
+h1,h2,h3{font-family:'Manrope',sans-serif!important;letter-spacing:-.035em}
+body>div,main>div,.max-w-4xl,.max-w-3xl,.max-w-2xl,.max-w-md{position:relative}
+body>div>div,main.w-full.max-w-md,.max-w-4xl>div,.max-w-3xl>div,.max-w-2xl>div{
+ background:rgba(255,255,255,.92)!important;border:1px solid rgba(238,232,235,.95)!important;
+ border-radius:26px!important;box-shadow:0 18px 55px rgba(70,48,61,.07)!important
+}
+input,select,textarea{border:1px solid #e9dfe4!important;border-radius:14px!important;background:#fff!important;color:var(--ink)!important;transition:border-color .2s,box-shadow .2s!important}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:var(--rose)!important;box-shadow:0 0 0 4px rgba(199,127,152,.13)!important}
+button{border-radius:15px!important;font-family:'DM Sans',sans-serif!important;font-weight:700!important;transition:transform .18s,box-shadow .18s,background .18s!important}
+button:hover{transform:translateY(-1px)}
+a{transition:color .18s}
+img{max-width:100%}
+.bg-white{background:#fff!important}
+.text-black,.text-gray-800,.text-gray-900{color:var(--ink)!important}
+.text-gray-500,.text-gray-600{color:var(--muted)!important}
+.border-gray-200,.border-gray-300{border-color:var(--line)!important}
+.shadow-xl,.shadow-lg,.shadow{box-shadow:0 12px 35px rgba(70,48,61,.07)!important}
+.rounded-3xl{border-radius:26px!important}
+.rounded-2xl{border-radius:18px!important}
+.bg-\[\#CFCFCF\],.bg-\[\#d1d1d1\],.bg-pink-500{background:var(--rose)!important;color:white!important}
+.hover\:bg-pink-600:hover{background:var(--rose-dark)!important}
+.border-\[\#696969\],.border-\[\#545454\],.border-\[\#bdbdbd\]{border-color:var(--line)!important}
+.text-\[\#696969\],.text-\[\#45433f\],.text-\[\#393939\]{color:var(--ink)!important}
+@media(max-width:640px){body{padding:16px!important}body>div,main.w-full.max-w-md{padding:22px!important;border-radius:22px!important}}
+</style>
 
 </head>
 
