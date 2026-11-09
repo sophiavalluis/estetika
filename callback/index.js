@@ -11,10 +11,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    window.location.href = "/login.html";
+    window.location.href = "/login/";
     return;
   }
 
   // garante sessão carregada antes de entrar no app
-  window.location.href = "/perfil.html";
+  window.location.href = "/perfil/";
 });
