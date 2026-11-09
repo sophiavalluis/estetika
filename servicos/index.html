@@ -1,216 +1,171 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
-  <link
-        rel="icon"
-        type="image/png"
-        href="../img/estetika.png"
-    >
-
+  <link rel="icon" type="image/png" href="../img/estetika.png">
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serviços | Estétika</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--ink:#29242a;--muted:#89818a;--line:#eee8eb;--rose:#c77f98;--rose-dark:#a95f7b;--paper:#fff;--canvas:#f3f4f6}
-*{box-sizing:border-box}
-body{font-family:'Inter',sans-serif!important;background:#f3f4f6!important;color:var(--ink)!important}
-h1,h2,h3{font-family:'Manrope',sans-serif!important;letter-spacing:-.035em}
-body>div,main>div,.max-w-4xl,.max-w-3xl,.max-w-2xl,.max-w-md{position:relative}
-body>div>div,main.w-full.max-w-md,.max-w-4xl>div,.max-w-3xl>div,.max-w-2xl>div{
- background:rgba(255,255,255,.92)!important;border:1px solid rgba(238,232,235,.95)!important;
- border-radius:26px!important;box-shadow:0 18px 55px rgba(70,48,61,.07)!important
-}
-input,select,textarea{border:1px solid #e9dfe4!important;border-radius:14px!important;background:#fff!important;color:var(--ink)!important;transition:border-color .2s,box-shadow .2s!important}
-input:focus,select:focus,textarea:focus{outline:none!important;border-color:var(--rose)!important;box-shadow:0 0 0 4px rgba(199,127,152,.13)!important}
-button{border-radius:15px!important;font-family:'Inter',sans-serif!important;font-weight:700!important;transition:transform .18s,box-shadow .18s,background .18s!important}
-button:hover{transform:translateY(-1px)}
-a{transition:color .18s}
-img{max-width:100%}
-.bg-white{background:#fff!important}
-.text-black,.text-gray-800,.text-gray-900{color:var(--ink)!important}
-.text-gray-500,.text-gray-600{color:var(--muted)!important}
-.border-gray-200,.border-gray-300{border-color:var(--line)!important}
-.shadow-xl,.shadow-lg,.shadow{box-shadow:0 12px 35px rgba(70,48,61,.07)!important}
-.rounded-3xl{border-radius:26px!important}
-.rounded-2xl{border-radius:18px!important}
-.bg-\[\#CFCFCF\],.bg-\[\#d1d1d1\],.bg-pink-500{background:var(--rose)!important;color:white!important}
-.hover\:bg-pink-600:hover{background:var(--rose-dark)!important}
-.border-\[\#696969\],.border-\[\#545454\],.border-\[\#bdbdbd\]{border-color:var(--line)!important}
-.text-\[\#696969\],.text-\[\#45433f\],.text-\[\#393939\]{color:var(--ink)!important}
-@media(max-width:640px){body{padding:16px!important}body>div,main.w-full.max-w-md{padding:22px!important;border-radius:22px!important}}
-
-/* acabamento premium da tela de serviços */
-#lista h2,#listaAddons h2{color:#302832!important;font-weight:700;letter-spacing:-.025em}
-#lista p,#listaAddons p{color:#77717b!important}
-#lista button,#listaAddons button{font-size:13px;letter-spacing:.01em}
-#lista .text-blue-600{color:#a95f7b!important}
-#lista .bg-yellow-500{background:#d5a64b!important}
-#lista .bg-green-500{background:#6f9b86!important}
-#lista .bg-red-500,#listaAddons .bg-red-500{background:#bd7588!important}
-#lista .bg-yellow-500:hover,#lista .bg-green-500:hover,#lista .bg-red-500:hover{filter:brightness(.96)}
-@media(max-width:640px){#lista>div,#listaAddons>div{align-items:flex-start!important;gap:16px;flex-direction:column}}
-</style>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--ink:#302832;--muted:#89818a;--line:#eee7eb;--rose:#c77f98;--rose-dark:#a95f7b;--canvas:#f7f5f6;--soft:#fbf8f9}
+    *{box-sizing:border-box}
+    body{font-family:Inter,sans-serif;background:var(--canvas);color:var(--ink)}
+    h1,h2,h3{font-family:Manrope,sans-serif;letter-spacing:-.035em}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 12px 35px rgba(70,48,61,.055)}
+    .field{width:100%;border:1px solid #e9dfe4;border-radius:13px;background:#fff;padding:13px 15px;color:var(--ink);font-size:14px;transition:.2s}
+    .field:focus{outline:none;border-color:var(--rose);box-shadow:0 0 0 4px rgba(199,127,152,.12)}
+    .field::placeholder{color:#aaa1a8}
+    .primary{background:var(--rose);color:#fff;transition:.2s}
+    .primary:hover{background:var(--rose-dark);transform:translateY(-1px);box-shadow:0 8px 18px rgba(169,95,123,.18)}
+    .eyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--rose-dark)}
+    .metric{background:linear-gradient(145deg,#fff,#fdf9fb);border:1px solid var(--line);border-radius:18px}
+    .service-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 5px 18px rgba(70,48,61,.035);transition:.2s}
+    .service-card:hover{border-color:#e4cbd5;box-shadow:0 10px 26px rgba(70,48,61,.07);transform:translateY(-2px)}
+    .icon-tile{width:42px;height:42px;border-radius:14px;background:#f9edf2;color:var(--rose-dark);display:grid;place-items:center;flex-shrink:0}
+    .meta-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:10px;background:#faf7f8;color:#756b73;font-size:12px;font-weight:600}
+    .action{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:11px;padding:9px 12px;font-size:12px;font-weight:700;transition:.18s}
+    .action:hover{transform:translateY(-1px)}
+    @media(max-width:640px){.panel{border-radius:20px}.service-card{padding:16px}.hero-title{font-size:29px}}
+  </style>
 </head>
+<body class="min-h-screen px-4 py-6 sm:px-6 sm:py-9">
+  <main class="mx-auto max-w-5xl">
+    <header class="mb-7">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="grid h-11 w-11 place-items-center rounded-2xl bg-white border border-[#eee7eb] shadow-sm text-[#a95f7b]">
+            <i data-lucide="layers-3" class="h-5 w-5"></i>
+          </div>
+          <div>
+            <p class="eyebrow">Estétika · Gestão</p>
+            <p class="text-xs font-semibold text-[#9a9098]">Painel do studio</p>
+          </div>
+        </div>
+        <a href="/perfil/" class="inline-flex items-center gap-2 rounded-xl border border-[#eee7eb] bg-white px-4 py-2.5 text-sm font-bold text-[#6f6570] shadow-sm hover:border-[#d9bdc9]">
+          <i data-lucide="user-round" class="h-4 w-4"></i><span>Perfil</span>
+        </a>
+      </div>
+      <div class="mt-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div class="max-w-2xl">
+          <p class="eyebrow mb-2">Catálogo de atendimento</p>
+          <h1 class="hero-title text-4xl font-extrabold text-[#302832]">Serviços e adicionais</h1>
+          <p class="mt-2 max-w-xl text-sm leading-6 text-[#89818a]">Organize o que você oferece, defina valores e duração e mantenha seu catálogo sempre atualizado para os agendamentos.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 md:w-64">
+          <div class="metric px-4 py-3">
+            <p class="text-xs font-semibold text-[#9a9098]">Serviços</p>
+            <p id="totalServicos" class="mt-1 text-2xl font-extrabold text-[#302832]">—</p>
+          </div>
+          <div class="metric px-4 py-3">
+            <p class="text-xs font-semibold text-[#9a9098]">Adicionais</p>
+            <p id="totalAddons" class="mt-1 text-2xl font-extrabold text-[#302832]">—</p>
+          </div>
+        </div>
+      </div>
+    </header>
 
-<body class="bg-gray-100 min-h-screen p-6">
-
-  <div class="max-w-3xl mx-auto">
-
-    <!-- TOPO -->
-    <div class="flex items-center justify-between mb-6">
-
-      <h1 class="text-3xl font-bold text-black">
-        Serviços
-      </h1>
-
-      <a
-        href="/perfil/"
-        class="bg-white border border-[#696969] text-[#696969] px-4 py-2 rounded-2xl shadow"
-      >
-        <i data-lucide="user-round" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> Perfil
-      </a>
-
-    </div>
-
-    <!-- FORM -->
-    <div class="bg-white p-6 rounded-3xl shadow-xl mb-6">
-
-      <h2 class="text-xl font-bold mb-4">
-        Novo Serviço
-      </h2>
-
-      <div class="grid md:grid-cols-3 gap-3">
-
-        <input
-          id="name"
-          placeholder="Nome"
-          class="p-3 border border-[#696969] rounded-2xl"
-        >
-
-        <input
-          id="price"
-          type="number"
-          placeholder="Preço"
-          class="p-3 border border-[#696969] rounded-2xl"
-        >
-
-        <input
-          id="duration"
-          type="number"
-          placeholder="Duração (min)"
-          class="p-3 border border-[#696969] rounded-2xl"
-        >
-        
-        <textarea
-          id="description"
-          placeholder="Descrição do serviço (opcional)"
-          class="p-3 border border-[#696969] rounded-2xl md:col-span-3 h-28 resize-none"
-        ></textarea>
-        
+    <section class="grid gap-5 lg:grid-cols-2">
+      <div class="panel overflow-hidden">
+        <div class="border-b border-[#f1ebee] bg-gradient-to-r from-[#fff] to-[#fcf5f8] p-5 sm:p-6">
+          <div class="flex items-start gap-3">
+            <div class="icon-tile"><i data-lucide="scissors" class="h-5 w-5"></i></div>
+            <div>
+              <p class="eyebrow">Seu catálogo principal</p>
+              <h2 class="mt-1 text-xl font-extrabold">Cadastrar serviço</h2>
+              <p class="mt-1 text-xs leading-5 text-[#89818a]">Procedimentos e atendimentos oferecidos pelo studio.</p>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-4 p-5 sm:p-6">
+          <div>
+            <label for="name" class="mb-1.5 block text-xs font-bold text-[#655b64]">Nome do serviço</label>
+            <input id="name" placeholder="Ex.: Alongamento em gel" class="field">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="price" class="mb-1.5 block text-xs font-bold text-[#655b64]">Preço (R$)</label>
+              <input id="price" type="number" min="0" step="0.01" placeholder="0,00" class="field">
+            </div>
+            <div>
+              <label for="duration" class="mb-1.5 block text-xs font-bold text-[#655b64]">Duração (min)</label>
+              <input id="duration" type="number" min="1" step="1" placeholder="Ex.: 90" class="field">
+            </div>
+          </div>
+          <div>
+            <label for="description" class="mb-1.5 block text-xs font-bold text-[#655b64]">Descrição <span class="font-medium text-[#aaa1a8]">(opcional)</span></label>
+            <textarea id="description" rows="3" placeholder="Explique brevemente como funciona esse serviço..." class="field resize-y"></textarea>
+          </div>
+          <button id="salvar" class="primary flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-extrabold">
+            <i data-lucide="plus" class="h-4 w-4"></i> Adicionar serviço
+          </button>
+        </div>
       </div>
 
-      <button
-        id="salvar"
-        class="
-          mt-4
-          w-full
-          bg-[#CFCFCF]
-          hover:bg-[#B8B8B8]
-          text-white
-          p-3
-          rounded-2xl
-          font-bold
-          transition
-        "
-      >
-        Salvar serviço
-      </button>
+      <div class="panel overflow-hidden">
+        <div class="border-b border-[#f1ebee] bg-gradient-to-r from-[#fff] to-[#f9f6fb] p-5 sm:p-6">
+          <div class="flex items-start gap-3">
+            <div class="grid h-[42px] w-[42px] flex-shrink-0 place-items-center rounded-[14px] bg-[#f1edf8] text-[#8873a6]"><i data-lucide="sparkles" class="h-5 w-5"></i></div>
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8873a6]">Complementos do atendimento</p>
+              <h2 class="mt-1 text-xl font-extrabold">Cadastrar adicional</h2>
+              <p class="mt-1 text-xs leading-5 text-[#89818a]">Itens extras que o cliente pode incluir ao agendar.</p>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-4 p-5 sm:p-6">
+          <div>
+            <label for="addonName" class="mb-1.5 block text-xs font-bold text-[#655b64]">Nome do adicional</label>
+            <input id="addonName" placeholder="Ex.: Nail art, decoração..." class="field">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="addonPrice" class="mb-1.5 block text-xs font-bold text-[#655b64]">Preço (R$)</label>
+              <input id="addonPrice" type="number" min="0" step="0.01" placeholder="0,00" class="field">
+            </div>
+            <div>
+              <label for="addonDuration" class="mb-1.5 block text-xs font-bold text-[#655b64]">Tempo extra (min)</label>
+              <input id="addonDuration" type="number" min="0" step="1" placeholder="Ex.: 15" class="field">
+            </div>
+          </div>
+          <div class="rounded-xl border border-dashed border-[#e9dce3] bg-[#fcf9fa] p-3.5 text-xs leading-5 text-[#89818a]">
+            <i data-lucide="info" class="mr-1 inline h-4 w-4 align-[-3px] text-[#a95f7b]"></i>
+            O valor e o tempo do adicional serão somados ao serviço escolhido no agendamento.
+          </div>
+          <button id="salvarAddon" class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8873a6] px-4 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#756091] hover:-translate-y-px">
+            <i data-lucide="plus" class="h-4 w-4"></i> Adicionar adicional
+          </button>
+        </div>
+      </div>
+    </section>
 
-    </div>
+    <section class="mt-9">
+      <div class="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <p class="eyebrow">Catálogo principal</p>
+          <h2 class="mt-1 text-2xl font-extrabold">Seus serviços</h2>
+        </div>
+        <span class="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#8b7e87] border border-[#eee7eb]">Procedimentos</span>
+      </div>
+      <div id="lista" class="grid gap-3 md:grid-cols-2"></div>
+    </section>
 
-<!-- NOVO ADICIONAL -->
-<div class="bg-white p-6 rounded-3xl shadow-xl mb-6">
-
-  <h2 class="text-xl font-bold mb-4">
-    Novo adicional
-  </h2>
-
-  <div class="grid md:grid-cols-3 gap-3">
-
-    <input
-      id="addonName"
-      placeholder="Nome do adicional"
-      class="p-3 border border-[#696969] rounded-2xl"
-    >
-
-    <input
-      id="addonPrice"
-      type="number"
-      placeholder="Preço"
-      class="p-3 border border-[#696969] rounded-2xl"
-    >
-
-    <input
-      id="addonDuration"
-      type="number"
-      placeholder="Duração (min)"
-      class="p-3 border border-[#696969] rounded-2xl"
-    >
-
-  </div>
-
-  <button
-    id="salvarAddon"
-    class="
-      mt-4
-      w-full
-      bg-[#696969]
-      hover:bg-[#4F4F4F]
-      text-white
-      p-3
-      rounded-2xl
-      font-bold
-      transition
-    "
-  >
-    Salvar adicional
-  </button>
-
-</div>
-
-    <!-- LISTA -->
-    <div
-      id="lista"
-      class="space-y-4"
-    ></div>
-
-  <!-- LISTA ADICIONAIS -->
-    <div
-      id="listaAddons"
-      class="space-y-4 mt-6"
-    ></div>
-
-  </div>
-
-
-
+    <section class="mt-9 pb-8">
+      <div class="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8873a6]">Personalize a experiência</p>
+          <h2 class="mt-1 text-2xl font-extrabold">Seus adicionais</h2>
+        </div>
+        <span class="rounded-full border border-[#eee7eb] bg-white px-3 py-1.5 text-xs font-bold text-[#8b7e87]">Extras</span>
+      </div>
+      <div id="listaAddons" class="grid gap-3 md:grid-cols-2"></div>
+    </section>
+  </main>
   <script src="index.js"></script>
+  <script>if(window.lucide) window.lucide.createIcons();</script>
 </body>
 </html>
