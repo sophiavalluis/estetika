@@ -1,91 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
-  <link
-        rel="icon"
-        type="image/png"
-        href="../img/estetika.png"
-    >
-  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entrar na sua conta</title>
+  <meta name="theme-color" content="#fff5f8">
+  <title>Entrar na sua conta | Estétika</title>
   <link rel="icon" type="image/png" href="/img/estetika.png">
-  <link rel="apple-touch-icon" href="nekko-beauty//img/estetika.png">
-
+  <link rel="apple-touch-icon" href="/img/estetika.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { color-scheme: light; }
+    * { -webkit-tap-highlight-color: transparent; }
+    body {
+      background:
+        radial-gradient(ellipse at 12% 18%, rgba(246, 190, 210, .52), transparent 34%),
+        radial-gradient(ellipse at 88% 82%, rgba(235, 190, 207, .52), transparent 35%),
+        linear-gradient(135deg, #fff8fa 0%, #fceef3 48%, #fff7f9 100%);
+      color: #513b46;
+      overflow-x: hidden;
+    }
+    .ambient-orb { position: absolute; border-radius: 9999px; pointer-events: none; filter: blur(1px); }
+    .login-card {
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(255,255,255,.92);
+      box-shadow: 0 28px 80px rgba(151, 83, 111, .14), 0 5px 18px rgba(151, 83, 111, .06);
+      backdrop-filter: blur(18px);
+    }
+    .field {
+      border: 1px solid #f0d9e2;
+      background: #fffafb;
+      color: #513b46;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .field::placeholder { color: #b79da8; }
+    .field:focus {
+      border-color: #d98eaa;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(217, 142, 170, .16);
+      outline: none;
+    }
+    .primary-btn {
+      background: linear-gradient(135deg, #d98eaa 0%, #c87598 100%);
+      box-shadow: 0 9px 20px rgba(193, 105, 143, .23);
+    }
+    .primary-btn:hover { background: linear-gradient(135deg, #d17f9f 0%, #b96388 100%); transform: translateY(-1px); }
+    .secondary-btn { border: 1px solid #e8bfd0; background: #fff5f8; color: #9d5875; }
+    .secondary-btn:hover { background: #fce8ef; border-color: #d995af; }
+    @media (prefers-reduced-motion: no-preference) {
+      .float-soft { animation: floatSoft 8s ease-in-out infinite; }
+      .float-soft.delay { animation-delay: -4s; }
+      @keyframes floatSoft { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-13px) } }
+    }
+  </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center p-4 bg-[#d1d1d1] text-[#45433f]">
-  <main class="w-full max-w-md rounded-2xl border border-[#545454] bg-[#ffffff] p-7 sm:p-9 shadow-xl shadow-[#545454]/30">
+<body class="relative flex min-h-screen items-center justify-center p-4 sm:p-6">
+  <div class="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+    <div class="ambient-orb float-soft left-[-90px] top-[-85px] h-72 w-72 bg-[#f4c8d8]/55"></div>
+    <div class="ambient-orb float-soft delay right-[-105px] top-[12%] h-64 w-64 bg-[#f6dce6]/75"></div>
+    <div class="ambient-orb float-soft bottom-[-120px] left-[18%] h-80 w-80 bg-[#f2cbd9]/45"></div>
+    <div class="absolute left-[12%] top-[29%] text-3xl text-[#d99ab2]/55">✦</div>
+    <div class="absolute right-[13%] top-[24%] text-xl text-[#d99ab2]/65">✧</div>
+    <div class="absolute bottom-[22%] right-[19%] text-3xl text-[#d99ab2]/50">✦</div>
+    <div class="absolute bottom-[17%] left-[15%] h-3 w-3 rounded-full bg-white/80 shadow-lg shadow-[#d99ab2]/30"></div>
+  </div>
+
+  <main class="login-card relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] p-7 sm:p-10">
+    <div class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#f4c9d8] via-[#d98eaa] to-[#f4c9d8]" aria-hidden="true"></div>
+
     <div class="mb-8 text-center">
-      <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-[#bdbdbd] bg-[#e0e0e0] shadow-sm" aria-hidden="true">
-        <img src="/img/estetika.png" alt="" class="h-full w-full object-contain" onerror="this.style.display='none'">
+      <div class="mx-auto mb-5 flex h-[76px] w-[76px] items-center justify-center overflow-hidden rounded-[1.65rem] border border-[#f4dce5] bg-gradient-to-br from-white to-[#fff0f5] shadow-[0_8px_24px_rgba(193,105,143,.12)]" aria-hidden="true">
+        <img src="/img/estetika.png" alt="" class="h-full w-full object-contain p-1.5" onerror="this.style.display='none'">
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-[#393939]">Bem-vindo de volta</h1>
-      <p class="mt-2 text-sm text-[#707070]">Entre com seus dados para continuar.</p>
+      <p class="mb-2 text-[10px] font-semibold tracking-[0.32em] text-[#c17a96]">SEU ESPAÇO DE BELEZA</p>
+      <h1 class="text-[1.75rem] font-semibold tracking-tight text-[#513b46]">Bem-vinda de volta</h1>
+      <p class="mt-2 text-sm text-[#987f8b]">Entre com seus dados para continuar.</p>
     </div>
 
-    <div class="space-y-4">
+    <div class="space-y-5">
       <div>
-        <label for="email" class="mb-1.5 block text-sm font-medium text-[#555555]">E-mail</label>
-        <input
-          id="email"
-          type="email"
-          placeholder="voce@exemplo.com"
-          autocomplete="email"
-          class="w-full rounded-xl border border-[#bdbdbd] bg-white px-4 py-3 text-[#393939] placeholder:text-[#929292] outline-none transition focus:border-[#666666] focus:ring-4 focus:ring-[#e0e0e0]"
-        >
+        <label for="email" class="mb-2 block text-sm font-medium text-[#715765]">E-mail</label>
+        <input id="email" type="email" placeholder="voce@exemplo.com" autocomplete="email"
+          class="field w-full rounded-2xl px-4 py-3.5 text-sm placeholder:text-[#b79da8]">
       </div>
 
       <div>
-        <label for="password" class="mb-1.5 block text-sm font-medium text-[#555555]">Senha</label>
-        <input
-          id="password"
-          type="password"
-          placeholder="Digite sua senha"
-          autocomplete="current-password"
-          class="w-full rounded-xl border border-[#bdbdbd] bg-white px-4 py-3 text-[#393939] placeholder:text-[#929292] outline-none transition focus:border-[#666666] focus:ring-4 focus:ring-[#e0e0e0]"
-        >
+        <label for="password" class="mb-2 block text-sm font-medium text-[#715765]">Senha</label>
+        <input id="password" type="password" placeholder="Digite sua senha" autocomplete="current-password"
+          class="field w-full rounded-2xl px-4 py-3.5 text-sm placeholder:text-[#b79da8]">
       </div>
 
-      <button
-        id="btnLogin"
-        type="button"
-        class="w-full rounded-xl bg-[#666666] py-3 font-semibold text-white shadow-md shadow-[#545454]/30 transition duration-200 hover:bg-[#4d4d4d] focus:outline-none focus:ring-4 focus:ring-[#d1d1d1] inline-flex items-center justify-center gap-2"
-      >
+      <button id="btnLogin" type="button"
+        class="primary-btn inline-flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-semibold text-white transition duration-200 focus:outline-none focus:ring-4 focus:ring-[#e9bfd0]/60">
         <i data-lucide="log-in" class="h-5 w-5" aria-hidden="true"></i>
         <span>Entrar</span>
       </button>
 
       <div class="flex items-center gap-3 py-1" aria-hidden="true">
-        <div class="h-px flex-1 bg-[#c9c9c9]"></div>
-        <span class="text-xs text-[#777777]">AINDA NÃO TEM CONTA?</span>
-        <div class="h-px flex-1 bg-[#c9c9c9]"></div>
+        <div class="h-px flex-1 bg-[#f0dce4]"></div>
+        <span class="text-[10px] font-semibold tracking-[0.16em] text-[#b18b9b]">AINDA NÃO TEM CONTA?</span>
+        <div class="h-px flex-1 bg-[#f0dce4]"></div>
       </div>
 
-      <button
-        id="btnSignup"
-        type="button"
-        class="w-full rounded-xl border border-[#666666] bg-[#e0e0e0] py-3 font-semibold text-[#45433f] transition duration-200 hover:border-[#545454] hover:bg-[#d1d1d1] focus:outline-none focus:ring-4 focus:ring-[#e0e0e0] inline-flex items-center justify-center gap-2"
-      >
+      <button id="btnSignup" type="button"
+        class="secondary-btn inline-flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-semibold transition duration-200 focus:outline-none focus:ring-4 focus:ring-[#f2d5e0]/70">
         <i data-lucide="user-round-plus" class="h-5 w-5" aria-hidden="true"></i>
         <span>Criar conta</span>
       </button>
     </div>
 
-    <p id="msg" role="status" aria-live="polite" class="mt-5 min-h-[20px] text-center text-sm text-[#666666]"></p>
+    <p id="msg" role="status" aria-live="polite" class="mt-5 min-h-[20px] text-center text-sm text-[#987f8b]"></p>
 
-    <div class="mt-6 flex items-center justify-center gap-2 border-t border-[#e0e0e0] pt-4 text-[#999999]" aria-label="Estétika">
+    <div class="mt-7 flex items-center justify-center gap-2 border-t border-[#f3e3e9] pt-5 text-[#bd91a3]" aria-label="Estétika">
       <i data-lucide="sparkles" class="h-4 w-4" aria-hidden="true"></i>
-      <span class="text-xs font-medium tracking-[0.18em]">ESTÉTIKA</span>
+      <span class="text-[10px] font-semibold tracking-[0.24em]">ESTÉTIKA</span>
     </div>
   </main>
 
-  
   <script src="index.js"></script>
 </body>
 </html>
