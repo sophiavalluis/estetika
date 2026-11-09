@@ -311,41 +311,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  // ================= SETTINGS =================
-  const { data: config } = await supabase
-    .from("profiles")
-    .select("capacity, slot_interval")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (config) {
-    el("capacity").value = config.capacity || 1;
-    el("slotInterval").value = config.slot_interval || 30;
-  }
-
-  el("saveSettings").onclick = async () => {
-    const button = el("saveSettings");
-    const originalText = "Salvar configurações";
-    button.disabled = true;
-    button.textContent = "Salvando...";
-    try {
-      const capacity = Math.max(1, parseInt(el("capacity").value, 10) || 1);
-      const slot_interval = parseInt(el("slotInterval").value, 10) || 30;
-      const { error } = await supabase.from("profiles").update({
-        capacity, slot_interval
-      }).eq("id", user.id);
-      if (error) throw error;
-      button.textContent = "Salvo!";
-      alert("Configurações salvas!");
-    } catch (err) {
-      console.error("Erro ao salvar configurações:", err);
-      alert(err.message || "Não foi possível salvar as configurações.");
-      button.textContent = "Tentar novamente";
-    } finally {
-      button.disabled = false;
-      window.setTimeout(() => button.textContent = originalText, 1800);
-    }
-  };
+  // Intervalo de agendamento é configurado junto à disponibilidade semanal.
+  let slotIntervalValue = 30;
 
   // ================= AVAILABILITY =================
   // Mantém o mesmo formato usado pela tela antiga de disponibilidade:
@@ -404,6 +371,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
       availabilityList.appendChild(card);
     });
+
+    // Card de intervalo ocupa o espaço ao lado do Domingo.
+    const intervalCard = document.createElement("div");
+    intervalCard.className = "availability-interval-card";
+    intervalCard.innerHTML = `
+      <b style="font:700 12px Manrope;color:#403740">Intervalo de agendamento</b>
+      <p class="interval-description">Configure o intervalo de horários entre cada agendamento.</p>
+      <select id="slotInterval" aria-label="Intervalo entre agendamentos">
+        <option value="15">15 minutos</option>
+        <option value="30">30 minutos</option>
+        <option value="60">1 hora</option>
+      </select>
+    `;
+    availabilityList.appendChild(intervalCard);
+    intervalCard.querySelector("#slotInterval").value = String(slotIntervalValue);
   }
 
   saveAvailabilityBtn?.addEventListener("click", async () => {
@@ -432,6 +414,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       });
 
+      const slot_interval = parseInt(el("slotInterval")?.value, 10) || 30;
+      const { error: intervalError } = await supabase.from("profiles").update({
+        slot_interval
+      }).eq("id", user.id);
+      if (intervalError) throw intervalError;
+      slotIntervalValue = slot_interval;
+
       const { error: deleteError } = await supabase
         .from("availability")
         .delete()
@@ -453,6 +442,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       saveAvailabilityBtn.disabled = false;
     }
   });
+
+  const { data: intervalConfig } = await supabase
+    .from("profiles")
+    .select("slot_interval")
+    .eq("id", user.id)
+    .maybeSingle();
+  slotIntervalValue = intervalConfig?.slot_interval || 30;
 
   loadAvailability();
 
