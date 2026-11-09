@@ -21,6 +21,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("lista");
 
   let statusAtual = "booked";
+  let diaAtual = "all";
+  let mesAtual = (() => {
+    const hoje = new Date();
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+  })();
 
   // 🔐 PEGAR USER
   const {
@@ -153,8 +158,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    // 🗓️ FILTROS DE MÊS E DIA DA SEMANA (data no fuso local)
+    const agendamentosFiltrados = (data || []).filter(item => {
+      if (!item.date) return false;
+      const partes = String(item.date).slice(0, 10).split("-");
+      if (partes.length !== 3) return false;
+      const [ano, mes, dia] = partes.map(Number);
+      const dataAgendamento = new Date(ano, mes - 1, dia);
+      if (Number.isNaN(dataAgendamento.getTime())) return false;
+
+      const chaveMes = `${ano}-${String(mes).padStart(2, "0")}`;
+      if (chaveMes !== mesAtual) return false;
+
+      if (diaAtual !== "all" && dataAgendamento.getDay() !== Number(diaAtual)) return false;
+      return true;
+    });
+
     // 🚫 VAZIO
-    if (!data || data.length === 0) {
+    if (!agendamentosFiltrados || agendamentosFiltrados.length === 0) {
 
       lista.innerHTML = `
         <div class="text-center text-gray-400 py-10">
@@ -170,7 +191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     lista.innerHTML = "";
 
     // 🎨 RENDER
-    data.forEach(item => {
+    agendamentosFiltrados.forEach(item => {
 
       const div =
         document.createElement("div");
@@ -512,13 +533,14 @@ window.verDetalhes = function(item) {
         ${fotos.length ? `
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             ${fotos.map((url, index) => `
-              <a href="${escaparHTML(url)}" target="_blank" rel="noopener noreferrer"
-                 class="block overflow-hidden rounded-2xl bg-gray-100">
+              <button type="button" data-photo-url="${escaparHTML(url)}"
+                 aria-label="Ampliar foto ${index + 1}"
+                 class="photo-preview block w-full overflow-hidden rounded-2xl bg-gray-100 text-left">
                 <img src="${escaparHTML(url)}" alt="Foto ${index + 1} do agendamento"
                      loading="lazy"
                      class="w-full h-40 sm:h-48 object-cover hover:scale-105 transition"
-                     onerror="this.closest('a').style.display='none'">
-              </a>
+                     onerror="this.closest('button').style.display='none'">
+              </button>
             `).join("")}
           </div>
         ` : `
@@ -535,9 +557,94 @@ window.verDetalhes = function(item) {
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.remove();
   });
+
+  // Abre a foto em um visualizador do próprio Estétika, sem nova guia.
+  modal.querySelectorAll("[data-photo-url]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      const url = botao.getAttribute("data-photo-url");
+      if (!url) return;
+
+      const visualizador = document.createElement("div");
+      visualizador.className = "fixed inset-0 z-[70] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4";
+      visualizador.innerHTML = `
+        <button type="button" aria-label="Fechar foto"
+          class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <img src="${escaparHTML(url)}" alt="Foto ampliada do agendamento"
+          class="max-w-full max-h-[88vh] object-contain rounded-xl shadow-2xl">
+      `;
+      document.body.appendChild(visualizador);
+      if (window.lucide) window.lucide.createIcons({ root: visualizador });
+
+      const fecharVisualizador = () => visualizador.remove();
+      visualizador.querySelector("button").addEventListener("click", fecharVisualizador);
+      visualizador.addEventListener("click", event => {
+        if (event.target === visualizador) fecharVisualizador();
+      });
+    });
+  });
 };
 
+  // 🗓️ FILTROS DE CALENDÁRIO
+  function configurarFiltroMes() {
+    const seletor = document.getElementById("filtroMes");
+    if (!seletor) return;
+
+    const hoje = new Date();
+    const opcoes = [];
+    // Exibe um intervalo amplo para permitir consultar meses futuros e anteriores.
+    for (let deslocamento = -12; deslocamento <= 24; deslocamento++) {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth() + deslocamento, 1);
+      const valor = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, "0")}`;
+      const rotulo = data.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+      opcoes.push(`<option value="${valor}">${escaparHTML(rotulo.charAt(0).toLocaleUpperCase("pt-BR") + rotulo.slice(1))}</option>`);
+    }
+    seletor.innerHTML = opcoes.join("");
+    seletor.value = mesAtual;
+    seletor.addEventListener("change", () => {
+      mesAtual = seletor.value;
+      carregarAgendamentos();
+    });
+  }
+
+  function configurarFiltrosDias() {
+    const container = document.getElementById("filtrosDias");
+    if (!container) return;
+
+    const hoje = new Date();
+    const hojeSemana = hoje.getDay();
+    const nomes = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+    const dias = [
+      { valor: "all", rotulo: "Todos os dias" },
+      ...nomes.map((nome, indice) => ({
+        valor: String(indice),
+        rotulo: indice === hojeSemana ? "Hoje" : nome
+      }))
+    ];
+
+    container.innerHTML = dias.map(dia => `
+      <button type="button" data-dia="${dia.valor}"
+        class="day-filter${dia.valor === diaAtual ? " active" : ""}"
+        aria-pressed="${dia.valor === diaAtual ? "true" : "false"}">${dia.rotulo}</button>
+    `).join("");
+
+    container.querySelectorAll("[data-dia]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        diaAtual = botao.dataset.dia;
+        container.querySelectorAll("[data-dia]").forEach(item => {
+          const ativo = item.dataset.dia === diaAtual;
+          item.classList.toggle("active", ativo);
+          item.setAttribute("aria-pressed", String(ativo));
+        });
+        carregarAgendamentos();
+      });
+    });
+  }
+
   // 🚀 INICIAR
+  configurarFiltroMes();
+  configurarFiltrosDias();
   atualizarBotoesAtivos();
 
   carregarAgendamentos();
