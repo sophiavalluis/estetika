@@ -358,6 +358,46 @@ function normalizarFotos(fotos) {
     .filter(url => /^https?:\/\//i.test(url));
 }
 
+
+// Converte o campo JSONB "addons" em uma lista previsível para o modal.
+// Aceita array de objetos, JSON serializado e formatos agrupados.
+function normalizarAdicionais(adicionais) {
+  if (!adicionais) return [];
+
+  let listaAdicionais = adicionais;
+
+  if (typeof listaAdicionais === "string") {
+    const texto = listaAdicionais.trim();
+    if (!texto) return [];
+    try {
+      listaAdicionais = JSON.parse(texto);
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(listaAdicionais)) {
+    if (Array.isArray(listaAdicionais.items)) {
+      listaAdicionais = listaAdicionais.items;
+    } else if (Array.isArray(listaAdicionais.addons)) {
+      listaAdicionais = listaAdicionais.addons;
+    } else {
+      listaAdicionais = [listaAdicionais];
+    }
+  }
+
+  return listaAdicionais.filter(Boolean).map(adicional => {
+    if (typeof adicional === "string") {
+      return { name: adicional, price: null, duration: null };
+    }
+    return {
+      name: adicional.name || adicional.title || adicional.label || "Adicional",
+      price: adicional.price ?? adicional.valor ?? null,
+      duration: adicional.duration ?? adicional.duration_minutes ?? adicional.minutes ?? null
+    };
+  });
+}
+
 window.verDetalhes = function(item) {
   if (!item || typeof item !== "object") {
     console.error("Não foi possível abrir os detalhes do agendamento:", item);
@@ -365,6 +405,7 @@ window.verDetalhes = function(item) {
   }
 
   const fotos = normalizarFotos(item.photo_urls);
+  const adicionais = normalizarAdicionais(item.addons);
   const modal = document.createElement("div");
 
   modal.className = `
@@ -378,6 +419,51 @@ window.verDetalhes = function(item) {
   const data = escaparHTML(item.date || "Não informada");
   const horario = escaparHTML(item.time || "Não informado");
   const descricao = escaparHTML(item.description || "");
+
+  const adicionaisHtml = adicionais.length
+    ? `
+      <div class="mb-6">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <h3 class="font-bold text-lg text-gray-900">Adicionais selecionados</h3>
+          <span class="text-xs font-semibold text-[#a56780] bg-[#f8f0f3] border border-[#f0dfe6] rounded-full px-3 py-1">
+            ${adicionais.length} ${adicionais.length === 1 ? "adicional" : "adicionais"}
+          </span>
+        </div>
+        <div class="space-y-2">
+          ${adicionais.map(adicional => {
+            const nomeAdicional = escaparHTML(adicional.name);
+            const precoAdicional = adicional.price !== null && adicional.price !== ""
+              && Number.isFinite(Number(adicional.price))
+              ? `R$ ${Number(adicional.price).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : "";
+            const duracaoAdicional = adicional.duration !== null && adicional.duration !== ""
+              ? `${escaparHTML(adicional.duration)} min`
+              : "";
+            const detalhesAdicional = [precoAdicional, duracaoAdicional].filter(Boolean).join(" · ");
+
+            return `
+              <div class="flex items-center justify-between gap-3 rounded-2xl bg-[#faf7f8] border border-[#f1eaee] p-4">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="w-9 h-9 rounded-xl bg-[#f8edf2] text-[#a56780] flex items-center justify-center flex-none">
+                    <i data-lucide="sparkles" class="icon icon-sm"></i>
+                  </span>
+                  <div class="min-w-0">
+                    <p class="font-semibold text-gray-800 break-words">${nomeAdicional}</p>
+                    ${detalhesAdicional ? `<p class="text-xs text-gray-500 mt-1">${detalhesAdicional}</p>` : ""}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `
+    : `
+      <div class="mb-6">
+        <h3 class="font-bold text-lg mb-2 text-gray-900">Adicionais selecionados</h3>
+        <p class="text-sm text-gray-400 bg-gray-50 rounded-2xl p-4">Nenhum adicional selecionado neste agendamento.</p>
+      </div>
+    `;
 
   modal.innerHTML = `
     <div class="
@@ -418,6 +504,8 @@ window.verDetalhes = function(item) {
           <div class="bg-gray-50 border border-gray-100 p-4 rounded-2xl text-gray-700 whitespace-pre-wrap">${descricao}</div>
         </div>
       ` : ""}
+
+      ${adicionaisHtml}
 
       <div class="mb-2">
         <h3 class="font-bold text-lg mb-3 text-gray-900">Fotos ${fotos.length ? `(${fotos.length})` : ""}</h3>
