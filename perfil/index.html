@@ -73,6 +73,10 @@
     #availabilityList label{font-size:10px;color:#827982}
     #availabilityList input[type=time]{min-width:0;width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 5px;font:500 11px 'DM Sans';background:#fcfafb}
     #availabilityList input[type=checkbox]{accent-color:var(--rose)}
+    .availability-interval-card{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff;display:flex;flex-direction:column;justify-content:center;min-height:150px}
+    .availability-interval-card .interval-description{font-size:10px;color:#827982;line-height:1.5;margin:5px 0 12px}
+    .availability-interval-card select{width:100%;height:38px;border:1px solid var(--line);border-radius:9px;padding:0 9px;font:500 11px 'DM Sans';background:#fcfafb;color:var(--ink)}
+
     #msg{font-size:12px;color:#6e9b7b}
     .status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:99px;background:#f4f7f3;color:#71896d;font-size:10px;font-weight:700}
  
@@ -182,16 +186,7 @@
   <div class="section-grid">
     <section class="surface section-card">
       <div class="section-head">
-        <div><div class="eyebrow mb-2">Organização da agenda</div><h2 class="section-title">Capacidade e duração</h2><p class="subtle">Defina como seus horários serão distribuídos.</p></div>
-        <div class="section-icon">◷</div>
-      </div>
-      <div class="field-block"><label class="field-label" for="capacity">Atendimentos simultâneos</label><input type="number" id="capacity" min="1" value="1" class="field"></div>
-      <div class="field-block"><label class="field-label" for="slotInterval">Intervalo entre horários</label><select id="slotInterval" class="field"><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option></select></div>
-      <button id="saveSettings" class="btn btn-dark w-full mt-2">Salvar configurações</button>
-    </section>
-    <section class="surface section-card">
-      <div class="section-head">
-        <div><div class="eyebrow mb-2">Disponibilidade semanal</div><h2 class="section-title">Seus horários</h2><p class="subtle">Escolha os dias, horários e quantidade de cadeiras em que você atende.</p></div>
+        <div><div class="eyebrow mb-2">Disponibilidade semanal</div><h2 class="section-title">Seus horários</h2><p class="subtle">Escolha os dias e horários em que você atende. Configure também o intervalo entre agendamentos.</p></div>
         <div class="section-icon"><i data-lucide="calendar-days"></i></div>
       </div>
       <div id="availabilityList" class="space-y-3"></div>
