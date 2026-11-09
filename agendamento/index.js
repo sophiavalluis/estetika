@@ -1,5 +1,5 @@
 window.onerror = function(message, source, lineno, colno, error) {
-  alert("ERRO JS: " + message);
+  console.error("Erro no agendamento:", message, source, lineno, colno, error);
 };
   
 document.addEventListener("DOMContentLoaded", async () => {
@@ -45,6 +45,40 @@ const addonsList =
 
 let selectedAddons = [];
 
+  const photosInput = document.getElementById("photos");
+  const photoPreview = document.getElementById("photoPreview");
+  const photoStatus = document.getElementById("photoStatus");
+  const confirmBookingButton = document.getElementById("confirmBooking");
+
+  // Mostra uma prévia de cada foto selecionada e confirma quantas serão anexadas.
+  photosInput?.addEventListener("change", () => {
+    const files = Array.from(photosInput.files || []);
+    photoPreview.innerHTML = "";
+
+    if (files.length > 2) {
+      photosInput.value = "";
+      photoStatus.textContent = "Você pode selecionar no máximo 2 imagens.";
+      return;
+    }
+
+    files.forEach((file, index) => {
+      if (!file.type.startsWith("image/")) return;
+      const item = document.createElement("div");
+      item.className = "photo-preview-item";
+      const image = document.createElement("img");
+      image.alt = `Foto de referência ${index + 1}`;
+      image.src = URL.createObjectURL(file);
+      const badge = document.createElement("span");
+      badge.textContent = `Imagem ${index + 1}`;
+      item.append(image, badge);
+      photoPreview.appendChild(item);
+    });
+
+    photoStatus.textContent = files.length
+      ? `${files.length} ${files.length === 1 ? "imagem selecionada" : "imagens selecionadas"}.`
+      : "Você pode anexar até 2 imagens.";
+  });
+
 async function carregarAddons() {
 
   const { data, error } =
@@ -61,14 +95,11 @@ async function carregarAddons() {
   }
 
   if (!data || data.length === 0) {
-
-    addonsArea.style.display = "block";
-
+    addonsArea.classList.add("hidden");
     return;
-
   }
 
-  addonsArea.style.display = "block";
+  addonsArea.classList.remove("hidden");
 
   addonsList.innerHTML = "";
 
@@ -77,8 +108,7 @@ async function carregarAddons() {
     const label =
       document.createElement("label");
 
-    label.className =
-      "flex items-center gap-2 bg-white border rounded-xl p-3 cursor-pointer";
+    label.className = "addon-item";
 
     const checkbox =
       document.createElement("input");
@@ -102,15 +132,10 @@ async function carregarAddons() {
 
     });
 
-    const span =
-      document.createElement("span");
-
-    span.innerHTML =
-      `<i data-lucide="plus-circle" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>${String(addon.name).replace(/[&<>"]/g, "")} (+R$${Number(addon.price).toFixed(2)})`;
+    const span = document.createElement("span");
+    span.textContent = `${addon.name} · +R$ ${Number(addon.price).toFixed(2)} · +${Number(addon.duration) || 0} min`;
 
     label.appendChild(checkbox);
-    if (window.lucide) window.lucide.createIcons({ root: label });
-
     label.appendChild(span);
 
     addonsList.appendChild(label);
@@ -240,6 +265,7 @@ try {
 
   if (services.length > 0) {
     calcularDuracaoTotal();
+    serviceSelect.dispatchEvent(new Event("change"));
   }
 
 } catch(err) {
@@ -362,6 +388,10 @@ async function render(date) {
 
   slots = gerarSlots();
 
+  const now = new Date();
+  const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
   slots.forEach(t => {
 
     const btn = document.createElement("button");
@@ -388,13 +418,13 @@ async function render(date) {
 
     });
 
-    if (ocupados >= capacity) {
+    const [slotHour, slotMinute] = t.split(":").map(Number);
+    const slotMinutes = slotHour * 60 + slotMinute;
+    const isPast = date === todayString && slotMinutes <= currentMinutes;
 
-      btn.className =
-        "bg-gray-300 p-2 rounded-xl opacity-50";
-
+    if (ocupados >= capacity || isPast) {
       btn.disabled = true;
-
+      btn.title = isPast ? "Este horário já passou" : "Horário indisponível";
     } else {
 
       btn.className =
@@ -405,17 +435,8 @@ async function render(date) {
         selectedSlot = t;
 
         document.querySelectorAll("#times button")
-          .forEach(b =>
-            b.classList.remove(
-              "bg-[#696969]",
-              "text-white"
-            )
-          );
-
-        btn.classList.add(
-          "bg-[#696969]",
-          "text-white"
-        );
+          .forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
 
       };
     }
@@ -426,90 +447,82 @@ async function render(date) {
 
 }
 
-  document.getElementById("date").addEventListener("change", (e) => {
-  selectedSlot = null;
-  render(e.target.value);
-});
+  const dateInput = document.getElementById("date");
+  const nowForDate = new Date();
+  const localToday = `${nowForDate.getFullYear()}-${String(nowForDate.getMonth() + 1).padStart(2, "0")}-${String(nowForDate.getDate()).padStart(2, "0")}`;
+  dateInput.min = localToday;
 
-  
-  // 🔵 AGENDAR
-  window.agendar = async function () {
-
-    const name = document.getElementById("name").value;
-    const phone = document.getElementById("phone").value;
-    const description =
-      document.getElementById("description").value;
-
-    const photoFiles =
-      document.getElementById("photos").files;
-    const date = document.getElementById("date").value;
-    const serviceSelect =
-  document.getElementById("service");
-
-const selectedService =
-  serviceSelect.options[
-    serviceSelect.selectedIndex
-  ];
-
-const service =
-  selectedService.dataset.name;
-
-const addonsSelecionados = [];
-
-document
-  .querySelectorAll(
-    '#addonsList input[type="checkbox"]:checked'
-  )
-  .forEach(cb => {
-
-    addonsSelecionados.push({
-      id: cb.value,
-      name: cb.dataset.name,
-      price: Number(cb.dataset.price),
-      duration: Number(cb.dataset.duration)
-    });
-
+  dateInput.addEventListener("change", (e) => {
+    selectedSlot = null;
+    render(e.target.value);
   });
 
-    let photo_urls = [];
+  
+  // ================= AGENDAR =================
+  window.agendar = async function () {
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const photoFiles = Array.from(document.getElementById("photos").files || []);
+    const date = document.getElementById("date").value;
+    const serviceSelect = document.getElementById("service");
+    const selectedService = serviceSelect.options[serviceSelect.selectedIndex];
 
+    if (!selectedService || !selectedService.dataset.name) {
+      alert("Selecione um serviço antes de continuar.");
+      return;
+    }
+    if (!name || !phone || !date || !selectedSlot) {
+      alert("Preencha seu nome, WhatsApp, data e escolha um horário.");
+      return;
+    }
     if (photoFiles.length > 2) {
-      alert("Máximo de 2 fotos");
+      alert("Você pode enviar no máximo 2 imagens.");
+      return;
+    }
+    if (photoFiles.some(file => !file.type.startsWith("image/"))) {
+      alert("Envie somente arquivos de imagem.");
       return;
     }
 
-    for (const file of photoFiles) {
+    const service = selectedService.dataset.name;
+    const addonsSelecionados = [];
+    document.querySelectorAll('#addonsList input[type="checkbox"]:checked').forEach(cb => {
+      addonsSelecionados.push({
+        id: cb.value,
+        name: cb.dataset.name,
+        price: Number(cb.dataset.price),
+        duration: Number(cb.dataset.duration)
+      });
+    });
 
-      const filePath =
-        `${ownerId}/${Date.now()}-${file.name}`;
+    if (confirmBookingButton) {
+      confirmBookingButton.disabled = true;
+      confirmBookingButton.innerHTML = '<i data-lucide="loader-circle"></i><span>Enviando agendamento...</span>';
+      window.lucide?.createIcons();
+    }
 
-      const { error: uploadError } =
-        await supabase.storage
+    let photo_urls = [];
+    const uploadedPaths = [];
+
+    try {
+      for (let i = 0; i < photoFiles.length; i++) {
+        const file = photoFiles[i];
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const uniqueToken = (window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+        const filePath = `${ownerId}/${uniqueToken}-${i + 1}-${safeName}`;
+
+        const { error: uploadError } = await supabase.storage
           .from("appointment-photos")
-          .upload(filePath, file);
+          .upload(filePath, file, { upsert: false });
+        if (uploadError) throw uploadError;
 
-      if (uploadError) {
-        console.log(uploadError);
-        alert("Erro ao enviar foto");
-        return;
+        uploadedPaths.push(filePath);
+        const { data } = supabase.storage.from("appointment-photos").getPublicUrl(filePath);
+        if (data?.publicUrl) photo_urls.push(data.publicUrl);
       }
 
-      const { data } =
-        supabase.storage
-          .from("appointment-photos")
-          .getPublicUrl(filePath);
-
-      photo_urls.push(data.publicUrl);
-    }
-
-    if (!name || !phone || !date || !selectedSlot) {
-      alert("Preencha tudo!");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("appointments")
-      .insert([{
+      const { error } = await supabase.from("appointments").insert([{
         user_id: ownerId,
         name,
         phone,
@@ -523,15 +536,34 @@ document
         addons: addonsSelecionados
       }]);
 
-    if (error) {
-      alert("Erro ao salvar");
-      return;
+      if (error) throw error;
+
+      alert("Agendamento realizado com sucesso!");
+      document.getElementById("name").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("description").value = "";
+      document.getElementById("photos").value = "";
+      document.getElementById("photoPreview").innerHTML = "";
+      document.getElementById("photoStatus").textContent = "Você pode anexar até 2 imagens.";
+      document.querySelectorAll('#addonsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      selectedSlot = null;
+      calcularDuracaoTotal();
+      render(date);
+
+    } catch (err) {
+      console.error("Erro ao realizar agendamento:", err);
+      alert(err.message || "Não foi possível concluir o agendamento. Confira os dados e tente novamente.");
+      if (uploadedPaths.length) {
+        const { error: cleanupError } = await supabase.storage.from("appointment-photos").remove(uploadedPaths);
+        if (cleanupError) console.warn("Não foi possível limpar imagens temporárias:", cleanupError);
+      }
+    } finally {
+      if (confirmBookingButton) {
+        confirmBookingButton.disabled = false;
+        confirmBookingButton.innerHTML = '<i data-lucide="calendar-check"></i><span>Confirmar agendamento</span>';
+        window.lucide?.createIcons();
+      }
     }
-
-    alert("Agendamento realizado!");
-
-    selectedSlot = null;
-    render(date);
   };
 
 });
