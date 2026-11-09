@@ -29,7 +29,10 @@
     .shell{max-width:1080px;margin:auto;position:relative;z-index:1;padding:38px 22px 64px}
     .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
     .brandmark{display:flex;align-items:center;gap:11px;font:800 15px Manrope,sans-serif;letter-spacing:-.04em}
-    .brandicon{width:36px;height:36px;border-radius:13px;background:#302a31;color:white;display:grid;place-items:center;box-shadow:0 6px 16px #302a3122}
+    .brandicon{width:36px;height:36px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;box-shadow:0 5px 15px rgba(72,48,62,.08);border:1px solid rgba(235,227,231,.8)}
+    .brand-logo{width:100%;height:100%;object-fit:contain;padding:3px}
+    .clock-display{display:flex;align-items:center;gap:7px;font:700 12px/1 'DM Sans',sans-serif;letter-spacing:.08em;color:#8b6879;text-align:right;margin-top:7px;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.78);border:1px solid #f0e4e9;border-radius:10px;padding:7px 10px;box-shadow:0 3px 10px rgba(90,55,72,.04)}
+    .clock-display:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--rose);box-shadow:0 0 0 3px rgba(199,127,152,.12)}
     .eyebrow{font-size:10px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--rose-dark)}
     .page-title{font-size:clamp(27px,4vw,38px);font-weight:800;line-height:1.12;margin:8px 0 7px}
     .subtle{color:var(--muted);font-size:13px;line-height:1.6}
@@ -43,6 +46,8 @@
     .action-row{display:flex;flex-wrap:wrap;gap:9px;position:relative;z-index:1}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:13px;padding:12px 16px;font-size:12px;font-weight:700;transition:.2s ease;border:1px solid transparent;cursor:pointer}
     .btn:hover{transform:translateY(-1px);filter:brightness(.98)}
+    #copiar svg{width:15px;height:15px;flex:none}
+    #copiar span{display:inline-block}
     .btn-primary{background:var(--rose);color:white;box-shadow:0 7px 16px #c77f982b}
     .btn-dark{background:#302a31;color:white}
     .btn-soft{background:#fff;border-color:var(--line);color:#514951}
@@ -93,7 +98,7 @@
 <div class="ambient"></div><div id="backgroundBlur" class="hidden" aria-hidden="true"></div>
 <main class="shell">
   <header class="topbar">
-    <div class="brandmark"><span class="brandicon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10 5.5 4 10 7h4l4.5-3 1.5 6v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 13h.01M16 13h.01M9 17c1.8 1.2 4.2 1.2 6 0"/></svg></span>estétika</div>
+    <div class="brandmark"><span class="brandicon"><img src="../img/estetika.png" alt="Logo Estétika" class="brand-logo"></span>estétika</div>
     <div class="topbar-status"><span class="status-pill"><span style="width:6px;height:6px;border-radius:50%;background:#91ad88"></span> Área do studio</span><div id="digitalClock" class="clock-display" aria-label="Relógio digital">--:--:--</div></div>
   </header>
 
@@ -120,7 +125,7 @@
     </div>
     <div class="link-panel" style="grid-column:1/-1">
       <div class="min-w-0"><div class="eyebrow">Seu link de agendamento</div><div id="publicLink" class="link-value">Carregando link...</div></div>
-      <button id="copiar" class="btn btn-dark">▣ &nbsp; Copiar link</button>
+      <button id="copiar" class="btn btn-dark"><i data-lucide="copy" aria-hidden="true"></i><span>Copiar link</span></button>
     </div>
   </section>
 
