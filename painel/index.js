@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 🔗 SUPABASE
   const supabaseUrl =
-    "https://bjaurtrqrasznuptthyf.supabase.co";
+    "https://nxbqhwubyeayzgnncxsk.supabase.co";
 
   const supabaseKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqYXVydHJxcmFzem51cHR0aHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDkwNTIsImV4cCI6MjA5MzQ4NTA1Mn0.iCQyvzAJykzgLO4kZkJZ8qNbv3549rG_JuwcVEZDrKA";
+    "sb_publishable_xq8o46ej843IL_PeYNeqtw_ShRZIIiQJykzgLO4kZkJZ8qNbv3549rG_JuwcVEZDrKA";
 
   const supabase =
     window.supabase.createClient(
