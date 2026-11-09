@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      window.location.href = "perfil.html";
+      window.location.href = "/perfil/";
     });
 
     // ================= SIGNUP =================
