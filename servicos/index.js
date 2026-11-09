@@ -33,6 +33,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnSalvarAddon =
     document.getElementById("salvarAddon");
 
+  const totalServicos = document.getElementById("totalServicos");
+  const totalAddons = document.getElementById("totalAddons");
+
+  function escapeHTML(value = "") {
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+  }
+
+  function formatarPreco(value) {
+    return Number(value || 0).toLocaleString("pt-BR", {
+      style: "currency", currency: "BRL"
+    });
+  }
+
   // 📥 CARREGAR
   async function carregarServicos() {
 
@@ -66,13 +81,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    totalServicos.textContent = data?.length || 0;
+
     if (!data || data.length === 0) {
 
       lista.innerHTML = `
-        <div class="bg-white p-8 rounded-3xl text-center shadow">
-          <p class="text-[#696969]">
-            Nenhum serviço cadastrado
-          </p>
+        <div class="col-span-full rounded-2xl border border-dashed border-[#e7dce2] bg-white p-9 text-center">
+          <div class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-[#f9edf2] text-[#a95f7b]"><i data-lucide="scissors" class="h-5 w-5"></i></div>
+          <p class="font-bold text-[#514751]">Seu catálogo começa aqui</p>
+          <p class="mt-1 text-sm text-[#89818a]">Cadastre seu primeiro serviço usando o formulário acima.</p>
         </div>
       `;
 
@@ -86,148 +103,59 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div =
         document.createElement("div");
 
-      div.className = `
-        bg-white
-        p-5
-        rounded-3xl
-        shadow-md
-        flex
-        justify-between
-        items-center
-      `;
+      div.className = "service-card";
+      const nome = escapeHTML(servico.name);
+      const descricao = escapeHTML(servico.description || "");
+      const ativo = !!servico.active;
 
       div.innerHTML = `
+        <div class="flex h-full flex-col">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex min-w-0 items-start gap-3">
+              <div class="icon-tile"><i data-lucide="scissors" class="h-5 w-5"></i></div>
+              <div class="min-w-0">
+                <h3 class="break-words text-base font-extrabold text-[#302832]">${nome}</h3>
+                <span class="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${ativo ? 'text-[#6f9b86]' : 'text-[#a19aa0]'}">
+                  <span class="h-1.5 w-1.5 rounded-full ${ativo ? 'bg-[#6f9b86]' : 'bg-[#b8b1b7]'}"></span>
+                  ${ativo ? 'Ativo' : 'Inativo'}
+                </span>
+              </div>
+            </div>
+            <span class="shrink-0 rounded-xl bg-[#f9edf2] px-3 py-2 text-sm font-extrabold text-[#a95f7b]">${formatarPreco(servico.price)}</span>
+          </div>
 
-        <div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span class="meta-pill"><i data-lucide="clock-3" class="h-3.5 w-3.5"></i>${escapeHTML(servico.duration)} min</span>
+            <span class="meta-pill"><i data-lucide="wallet" class="h-3.5 w-3.5"></i>Valor por atendimento</span>
+          </div>
 
-          <h2 class="font-bold text-lg">
-            ${servico.name}
-          </h2>
-
-          <p class="text-[#696969] mt-1">
-            <i data-lucide="wallet" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>R$${Number(servico.price).toFixed(2)}
-          </p>
-
-          <p class="text-[#808080] text-sm">
-            <i data-lucide="clock" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> ${servico.duration} min
-          </p>
-
-          ${
-            servico.description
-              ? `
-                <button
-                  onclick="toggleDescricao(${servico.id})"
-                  class="
-                    text-sm
-                    text-[#696969]
-                    mt-2
-                    underline
-                  "
-                >
-                  <i data-lucide="chevron-down" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> Ver descrição
+          ${descricao ? `
+            <div class="mt-3 border-t border-[#f1ebee] pt-3">
+              <button onclick="toggleDescricao(${servico.id}, this)" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#a95f7b] hover:text-[#884760]">
+                <i data-lucide="chevron-down" class="h-4 w-4"></i> Ver descrição
+              </button>
+              <div id="descricao-${servico.id}" class="hidden mt-3">
+                <p class="whitespace-pre-wrap text-xs leading-5 text-[#817781]">${descricao}</p>
+                <button onclick="mostrarEdicao(${servico.id})" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#8873a6]">
+                  <i data-lucide="pencil" class="h-3.5 w-3.5"></i> Editar descrição
                 </button>
-          
-                <div
-                  id="descricao-${servico.id}"
-                  class="hidden mt-2"
-                >
-          
-                  <p class="
-                    text-[#696969]
-                    text-sm
-                    whitespace-pre-wrap
-                    mb-3
-                  ">
-                    <i data-lucide="file-text" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> ${servico.description}
-                  </p>
-          
-                  <button
-                    onclick="mostrarEdicao(${servico.id})"
-                    class="
-                      text-sm
-                      text-blue-600
-                      underline
-                      mb-2
-                    "
-                  >
-                    <i data-lucide="pencil" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> Editar descrição
-                  </button>
-          
-                  <div
-                    id="editar-${servico.id}"
-                    class="hidden"
-                  >
-          
-                    <textarea
-                      id="textarea-${servico.id}"
-                      class="
-                        w-full
-                        border
-                        border-[#696969]
-                        rounded-2xl
-                        p-3
-                        text-sm
-                        h-28
-                        resize-none
-                      "
-                    >${servico.description}</textarea>
-          
-                    <button
-                      onclick="salvarDescricao(${servico.id})"
-                      class="
-                        mt-2
-                        bg-[#696969]
-                        text-white
-                        px-4
-                        py-2
-                        rounded-2xl
-                        text-sm
-                      "
-                    >
-                      Salvar descrição
-                    </button>
-          
-                  </div>
-          
+                <div id="editar-${servico.id}" class="hidden mt-2">
+                  <textarea id="textarea-${servico.id}" class="field min-h-24 resize-y text-sm">${descricao}</textarea>
+                  <button onclick="salvarDescricao(${servico.id})" class="mt-2 rounded-lg bg-[#8873a6] px-3 py-2 text-xs font-bold text-white">Salvar descrição</button>
                 </div>
-              `
-              : ""
-          }
-          
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="mt-auto flex flex-wrap gap-2 border-t border-[#f1ebee] pt-4 ${descricao ? 'mt-4' : 'mt-5'}">
+            <button onclick="toggleServico(${servico.id}, ${ativo})" class="action ${ativo ? 'bg-[#fbf3e5] text-[#a77b32]' : 'bg-[#edf5f0] text-[#56816a]'}">
+              <i data-lucide="${ativo ? 'pause' : 'play'}" class="h-3.5 w-3.5"></i>${ativo ? 'Desativar' : 'Ativar'}
+            </button>
+            <button onclick="deletarServico(${servico.id})" class="action bg-[#fbf0f2] text-[#b36c7d]">
+              <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>Excluir
+            </button>
+          </div>
         </div>
-
-        <div class="flex gap-2">
-
-          <button
-            onclick="toggleServico(${servico.id}, ${servico.active})"
-            class="
-              px-4
-              py-2
-              rounded-2xl
-              text-white
-              font-semibold
-              ${servico.active ? 'bg-yellow-500' : 'bg-green-500'}
-            "
-          >
-            ${servico.active ? 'Desativar' : 'Ativar'}
-          </button>
-
-          <button
-            onclick="deletarServico(${servico.id})"
-            class="
-              px-4
-              py-2
-              rounded-2xl
-              bg-red-500
-              text-white
-              font-semibold
-            "
-          >
-            Excluir
-          </button>
-
-        </div>
-
       `;
 
       lista.appendChild(div);
@@ -270,11 +198,15 @@ async function carregarAddons() {
     return;
   }
 
+  totalAddons.textContent = data?.length || 0;
+
   if (!data || data.length === 0) {
 
     listaAddons.innerHTML = `
-      <div class="bg-white p-6 rounded-3xl shadow text-center">
-        Nenhum adicional cadastrado
+      <div class="col-span-full rounded-2xl border border-dashed border-[#e7dce2] bg-white p-9 text-center">
+        <div class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-[#f1edf8] text-[#8873a6]"><i data-lucide="sparkles" class="h-5 w-5"></i></div>
+        <p class="font-bold text-[#514751]">Nenhum adicional por enquanto</p>
+        <p class="mt-1 text-sm text-[#89818a]">Cadastre extras para oferecer mais opções no agendamento.</p>
       </div>
     `;
 
@@ -288,66 +220,38 @@ async function carregarAddons() {
     const div =
       document.createElement("div");
 
-    div.className = `
-      bg-white
-      p-5
-      rounded-3xl
-      shadow-md
-      flex
-      justify-between
-      items-center
-    `;
+    div.className = "service-card";
+    const nome = escapeHTML(addon.name);
+    const ativo = !!addon.active;
 
     div.innerHTML = `
-
-      <div>
-    
-        <h2 class="font-bold text-lg">
-          <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-1 align-[-3px] text-pink-400"></i> ${addon.name}
-        </h2>
-    
-        <p class="text-[#696969] mt-1">
-          <i data-lucide="wallet" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i>R$${Number(addon.price).toFixed(2)}
-        </p>
-    
-        <p class="text-[#808080] text-sm">
-          <i data-lucide="clock" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> ${addon.duration} min
-        </p>
-    
+      <div class="flex h-full flex-col">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-start gap-3">
+            <div class="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[14px] bg-[#f1edf8] text-[#8873a6]"><i data-lucide="sparkles" class="h-5 w-5"></i></div>
+            <div class="min-w-0">
+              <h3 class="break-words text-base font-extrabold text-[#302832]">${nome}</h3>
+              <span class="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${ativo ? 'text-[#6f9b86]' : 'text-[#a19aa0]'}">
+                <span class="h-1.5 w-1.5 rounded-full ${ativo ? 'bg-[#6f9b86]' : 'bg-[#b8b1b7]'}"></span>
+                ${ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            </div>
+          </div>
+          <span class="shrink-0 rounded-xl bg-[#f1edf8] px-3 py-2 text-sm font-extrabold text-[#8873a6]">${formatarPreco(addon.price)}</span>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="meta-pill"><i data-lucide="clock-3" class="h-3.5 w-3.5"></i>+ ${escapeHTML(addon.duration)} min</span>
+          <span class="meta-pill"><i data-lucide="plus-circle" class="h-3.5 w-3.5"></i>Adicional</span>
+        </div>
+        <div class="mt-auto flex flex-wrap gap-2 border-t border-[#f1ebee] pt-4 mt-5">
+          <button onclick="toggleAddon('${addon.id}', ${ativo})" class="action ${ativo ? 'bg-[#fbf3e5] text-[#a77b32]' : 'bg-[#edf5f0] text-[#56816a]'}">
+            <i data-lucide="${ativo ? 'pause' : 'play'}" class="h-3.5 w-3.5"></i>${ativo ? 'Desativar' : 'Ativar'}
+          </button>
+          <button onclick="deletarAddon('${addon.id}')" class="action bg-[#fbf0f2] text-[#b36c7d]">
+            <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>Excluir
+          </button>
+        </div>
       </div>
-    
-      <div class="flex gap-2">
-    
-        <button
-          onclick="toggleAddon('${addon.id}', ${addon.active})"
-          class="
-            px-4
-            py-2
-            rounded-2xl
-            text-white
-            font-semibold
-            ${addon.active ? 'bg-yellow-500' : 'bg-green-500'}
-          "
-        >
-          ${addon.active ? 'Desativar' : 'Ativar'}
-        </button>
-    
-        <button
-          onclick="deletarAddon('${addon.id}')"
-          class="
-            px-4
-            py-2
-            rounded-2xl
-            bg-red-500
-            text-white
-            font-semibold
-          "
-        >
-          Excluir
-        </button>
-    
-      </div>
-    
     `;
 
     listaAddons.appendChild(div);
@@ -496,22 +400,19 @@ btnSalvarAddon.addEventListener("click", async () => {
   };
 
 // MOSTRAR / OCULTAR DESCRIÇÃO
-window.toggleDescricao = function(id) {
+window.toggleDescricao = function(id, button) {
 
   const div =
     document.getElementById(
       `descricao-${id}`
     );
 
-  const button =
-    event.target;
-
   if (div.classList.contains("hidden")) {
 
     div.classList.remove("hidden");
 
     button.innerHTML =
-      '<i data-lucide="chevron-up" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> Ocultar descrição';
+      '<i data-lucide="chevron-up" class="h-4 w-4"></i> Ocultar descrição';
     if (window.lucide) window.lucide.createIcons({ root: button });
 
   } else {
@@ -519,7 +420,7 @@ window.toggleDescricao = function(id) {
     div.classList.add("hidden");
 
     button.innerHTML =
-      '<i data-lucide="chevron-down" class="inline-block w-4 h-4 mr-1 align-[-3px]"></i> Ver descrição';
+      '<i data-lucide="chevron-down" class="h-4 w-4"></i> Ver descrição';
     if (window.lucide) window.lucide.createIcons({ root: button });
 
 
