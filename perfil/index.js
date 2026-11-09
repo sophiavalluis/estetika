@@ -11,6 +11,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const el = (id) => document.getElementById(id);
   window.lucide?.createIcons();
 
+  // Relógio digital da área do studio (horário local do dispositivo).
+  const clock = document.getElementById("digitalClock");
+  const updateClock = () => {
+    if (!clock) return;
+    clock.textContent = new Intl.DateTimeFormat("pt-BR", {
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+    }).format(new Date());
+  };
+  updateClock();
+  setInterval(updateClock, 1000);
+
   const studioInput = el("studio");
   const usernameInput = el("username");
   const preview = el("preview");
@@ -28,8 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const applyTheme = (color) => {
     document.documentElement.style.setProperty("--rose", color);
     document.documentElement.style.setProperty("--rose-dark", color);
-    document.querySelectorAll(".btn-primary").forEach(button => button.style.backgroundColor = color);
-    document.querySelectorAll(".btn-primary").forEach(button => button.style.boxShadow = `0 7px 16px ${color}2b`);
+     document.querySelectorAll(".btn-primary, #copiar, #saveSettings").forEach(button => { button.style.backgroundColor = color; button.style.boxShadow = `0 7px 16px ${color}2b`; });
     el("themePalette")?.querySelectorAll(".color-swatch").forEach(button => {
       button.classList.toggle("selected", button.dataset.color.toLowerCase() === color.toLowerCase());
     });
@@ -170,20 +180,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     </a>
   `;
 
-  el("copiar").onclick = async () => {
+  const copyAgendaLink = async (link) => {
+    const button = el("copiar");
+    const originalText = "▣  Copiar link";
     try {
-      await navigator.clipboard.writeText(fullLink);
-      el("copiar").textContent = "Copiado!";
-      setTimeout(() => (el("copiar").textContent = "Copiar Link"), 1200);
-    } catch {
-      const temp = document.createElement("input");
-      document.body.appendChild(temp);
-      temp.value = fullLink;
-      temp.select();
-      document.execCommand("copy");
-      document.body.removeChild(temp);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const temp = document.createElement("textarea");
+        temp.value = link;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        const copied = document.execCommand("copy");
+        temp.remove();
+        if (!copied) throw new Error("Não foi possível copiar automaticamente.");
+      }
+      button.textContent = "Copiado!";
+      button.setAttribute("aria-label", "Link copiado");
+      window.setTimeout(() => {
+        button.textContent = originalText;
+        button.removeAttribute("aria-label");
+      }, 1800);
+    } catch (err) {
+      console.error("Erro ao copiar link:", err);
+      button.textContent = "Selecione o link acima";
+      window.setTimeout(() => button.textContent = originalText, 2200);
     }
   };
+  el("copiar").onclick = () => copyAgendaLink(fullLink);
 
   el("abrirAgenda").onclick = () => window.open(fullLink, "_blank");
 
@@ -256,10 +283,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const updatedLink = `https://agenda-beleza-eta.vercel.app/agendamento.html?studio=${updatedUsername}`;
       publicLink.innerHTML = `<a href="${updatedLink}" target="_blank" class="text-[#A9A9A9] break-all font-semibold">${updatedLink}</a>`;
       el("abrirAgenda").onclick = () => window.open(updatedLink, "_blank");
-      el("copiar").onclick = async () => {
-        try { await navigator.clipboard.writeText(updatedLink); el("copiar").textContent = "Copiado!"; }
-        catch { const temp = document.createElement("input"); document.body.appendChild(temp); temp.value = updatedLink; temp.select(); document.execCommand("copy"); temp.remove(); }
-      };
+      el("copiar").onclick = () => copyAgendaLink(updatedLink);
 
       // Remove arquivos antigos somente depois de o perfil ser salvo.
       if (oldLogoUrl && oldLogoUrl !== logo_url) {
@@ -297,12 +321,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   el("saveSettings").onclick = async () => {
-    await supabase.from("profiles").update({
-      capacity: parseInt(el("capacity").value),
-      slot_interval: parseInt(el("slotInterval").value)
-    }).eq("id", user.id);
-
-    alert("Configurações salvas!");
+    const button = el("saveSettings");
+    const originalText = "Salvar configurações";
+    button.disabled = true;
+    button.textContent = "Salvando...";
+    try {
+      const capacity = Math.max(1, parseInt(el("capacity").value, 10) || 1);
+      const slot_interval = parseInt(el("slotInterval").value, 10) || 30;
+      const { error } = await supabase.from("profiles").update({
+        capacity, slot_interval
+      }).eq("id", user.id);
+      if (error) throw error;
+      button.textContent = "Salvo!";
+      alert("Configurações salvas!");
+    } catch (err) {
+      console.error("Erro ao salvar configurações:", err);
+      alert(err.message || "Não foi possível salvar as configurações.");
+      button.textContent = "Tentar novamente";
+    } finally {
+      button.disabled = false;
+      window.setTimeout(() => button.textContent = originalText, 1800);
+    }
   };
 
   // ================= AVAILABILITY =================
