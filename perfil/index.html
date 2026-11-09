@@ -24,7 +24,8 @@
     body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--ink)}
     h1,h2,h3,.display{font-family:'Manrope',sans-serif;letter-spacing:-.035em}
     .ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;background:radial-gradient(ellipse at 8% 5%,rgba(235,196,210,.28),transparent 36%),radial-gradient(ellipse at 95% 38%,rgba(225,213,226,.32),transparent 35%)}
-    .ambient:after{content:"";position:absolute;inset:0;opacity:.22;background-image:radial-gradient(#c9aab7 .7px,transparent .7px);background-size:24px 24px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+    .ambient:before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:7%;top:18%;background:rgba(236,213,223,.24);box-shadow:-70vw 38vh 0 -80px rgba(231,218,236,.28),-35vw 75vh 0 -105px rgba(244,224,215,.32),25vw 82vh 0 -115px rgba(221,235,229,.26)}
+    .ambient:after{content:"";position:absolute;inset:0;opacity:.16;background-image:radial-gradient(#c9aab7 .7px,transparent .7px);background-size:24px 24px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
     .shell{max-width:1080px;margin:auto;position:relative;z-index:1;padding:38px 22px 64px}
     .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
     .brandmark{display:flex;align-items:center;gap:11px;font:800 15px Manrope,sans-serif;letter-spacing:-.04em}
@@ -79,8 +80,10 @@
     .color-swatch{width:34px;height:34px;border-radius:50%;background:var(--swatch);border:3px solid white;box-shadow:0 0 0 1px #e8e1e5;cursor:pointer;transition:.18s}
     .color-swatch:hover{transform:scale(1.08)}
     .color-swatch.selected{box-shadow:0 0 0 3px var(--swatch);transform:scale(1.05)}
-    .background-preview-wrap{height:130px;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#f5eef1}
-    #backgroundCurrentPreview{width:100%;height:100%;object-fit:cover}
+    .background-preview-wrap{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff;min-height:110px}
+    #backgroundCurrentPreview{width:82px;height:82px;object-fit:cover;border-radius:18px;border:1px solid var(--line);background:#f7f2f4;flex:none}
+    .clock-display{font:700 11px/1.2 DM Sans,sans-serif;letter-spacing:.12em;color:#8b7b85;text-align:right;margin-top:5px;font-variant-numeric:tabular-nums}
+    .topbar-status{display:flex;flex-direction:column;align-items:flex-end}
     @media(max-width:480px){.asset-preview{align-items:flex-start;flex-direction:column}.asset-actions{width:100%}.color-swatch{width:30px;height:30px}}
     @media(max-width:700px){.shell{padding:24px 14px 42px}.hero{grid-template-columns:1fr;padding:21px}.action-row{display:grid;grid-template-columns:1fr 1fr}.action-row .btn{padding:12px 9px}.section-grid{grid-template-columns:1fr}.section-card{padding:20px}.link-panel{align-items:flex-start;flex-direction:column}.link-panel .btn{width:100%}}
     @media(max-width:390px){#availabilityList{grid-template-columns:1fr}.profile-row{gap:13px}#preview{width:76px;height:76px;border-radius:21px}#studioTitle{font-size:21px}}
@@ -91,7 +94,7 @@
 <main class="shell">
   <header class="topbar">
     <div class="brandmark"><span class="brandicon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10 5.5 4 10 7h4l4.5-3 1.5 6v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 13h.01M16 13h.01M9 17c1.8 1.2 4.2 1.2 6 0"/></svg></span>estétika</div>
-    <span class="status-pill"><span style="width:6px;height:6px;border-radius:50%;background:#91ad88"></span> Área do studio</span>
+    <div class="topbar-status"><span class="status-pill"><span style="width:6px;height:6px;border-radius:50%;background:#91ad88"></span> Área do studio</span><div id="digitalClock" class="clock-display" aria-label="Relógio digital">--:--:--</div></div>
   </header>
 
   <div class="mb-6">
@@ -157,7 +160,8 @@
       <div class="field-block sm:col-span-2">
         <label class="field-label" for="backgroundFile">Imagem de fundo</label>
         <div class="background-preview-wrap">
-          <img id="backgroundCurrentPreview" src="https://placehold.co/600x180/png?text=Imagem+de+fundo" alt="Prévia da imagem de fundo">
+          <img id="backgroundCurrentPreview" src="https://placehold.co/96x96/png?text=Fundo" alt="Prévia da imagem de fundo">
+          <div class="asset-actions"><p class="subtle">Prévia da imagem de fundo do seu perfil.</p><p class="hint">A imagem será aplicada à página pública do studio.</p></div>
         </div>
         <div class="asset-actions mt-3">
           <input type="file" id="backgroundFile" class="field" accept="image/*">
