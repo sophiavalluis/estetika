@@ -1,0 +1,20 @@
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const supabase = window.supabase.createClient(
+    "https://bjaurtrqrasznuptthyf.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqYXVydHJxcmFzem51cHR0aHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDkwNTIsImV4cCI6MjA5MzQ4NTA1Mn0.iCQyvzAJykzgLO4kZkJZ8qNbv3549rG_JuwcVEZDrKA"
+  );
+
+  //ESSA LINHA É BISU FI
+  await supabase.auth.getSession();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    window.location.href = "/login.html";
+    return;
+  }
+
+  // garante sessão carregada antes de entrar no app
+  window.location.href = "/perfil.html";
+});
