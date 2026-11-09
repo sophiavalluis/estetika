@@ -187,66 +187,111 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // ================= AVAILABILITY =================
-  const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"];
+  // Mantém o mesmo formato usado pela tela antiga de disponibilidade:
+  // weekday (texto), open_time, close_time e chairs.
+  const dias = [
+    { key: "monday", label: "Segunda-feira" },
+    { key: "tuesday", label: "Terça-feira" },
+    { key: "wednesday", label: "Quarta-feira" },
+    { key: "thursday", label: "Quinta-feira" },
+    { key: "friday", label: "Sexta-feira" },
+    { key: "saturday", label: "Sábado" },
+    { key: "sunday", label: "Domingo" }
+  ];
+
+  const saveAvailabilityBtn = el("saveAvailability");
+  const availabilityMsg = el("availabilityMsg");
 
   async function loadAvailability() {
-
     availabilityList.innerHTML = "";
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("availability")
       .select("*")
       .eq("user_id", user.id);
 
-    for (let i = 0; i < 7; i++) {
-
-      const d = data?.find(x => x.weekday === i);
-
-      const div = document.createElement("div");
-      div.className = "border p-3 rounded-2xl";
-
-            div.innerHTML = `
-        <div class="flex items-center justify-between mb-3">
-      
-          <b class="text-lg">${dias[i]}</b>
-      
-          <label class="flex items-center gap-2 text-sm">
-      
-            <span>Aberto</span>
-      
-            <input
-              type="checkbox"
-              id="active-${i}"
-              class="w-5 h-5"
-              ${d?.active !== false ? "checked" : ""}
-            >
-      
-          </label>
-      
-        </div>
-      
-        <div class="grid grid-cols-2 gap-2">
-      
-          <input
-            type="time"
-            id="start-${i}"
-            value="${d?.start_time || "09:00"}"
-            class="border p-2 rounded-xl"
-          >
-      
-          <input
-            type="time"
-            id="end-${i}"
-            value="${d?.end_time || "18:00"}"
-            class="border p-2 rounded-xl"
-          >
-      
-        </div>
-      `;
-
-      availabilityList.appendChild(div);
+    if (error) {
+      console.error("Erro ao carregar disponibilidade:", error);
+      availabilityList.innerHTML = '<p class="subtle">Não foi possível carregar os horários.</p>';
+      return;
     }
+
+    dias.forEach(dia => {
+      const item = data?.find(row => row.weekday === dia.key);
+      const card = document.createElement("div");
+      card.className = "availability-day";
+      card.dataset.weekday = dia.key;
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <b>${dia.label}</b>
+          <label class="flex items-center gap-2">
+            <span>Atender</span>
+            <input type="checkbox" class="availability-active" ${item ? "checked" : ""}>
+          </label>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <label>Abre
+            <input type="time" class="availability-open field mt-1" value="${item?.open_time || "09:00"}">
+          </label>
+          <label>Fecha
+            <input type="time" class="availability-close field mt-1" value="${item?.close_time || "18:00"}">
+          </label>
+        </div>
+        <label class="field-label mt-3">Quantidade de cadeiras
+          <input type="number" min="1" class="availability-chairs field mt-1" value="${item?.chairs || 1}">
+        </label>
+      `;
+      availabilityList.appendChild(card);
+    });
   }
+
+  saveAvailabilityBtn?.addEventListener("click", async () => {
+    saveAvailabilityBtn.disabled = true;
+    availabilityMsg.textContent = "Salvando disponibilidade...";
+
+    try {
+      const rows = [];
+      availabilityList.querySelectorAll("[data-weekday]").forEach(card => {
+        if (!card.querySelector(".availability-active").checked) return;
+
+        const open_time = card.querySelector(".availability-open").value;
+        const close_time = card.querySelector(".availability-close").value;
+        const chairs = Math.max(1, Number(card.querySelector(".availability-chairs").value) || 1);
+
+        if (!open_time || !close_time || open_time >= close_time) {
+          throw new Error(`Confira os horários de ${card.querySelector("b").textContent}: o horário de fechamento deve ser depois da abertura.`);
+        }
+
+        rows.push({
+          user_id: user.id,
+          weekday: card.dataset.weekday,
+          open_time,
+          close_time,
+          chairs
+        });
+      });
+
+      const { error: deleteError } = await supabase
+        .from("availability")
+        .delete()
+        .eq("user_id", user.id);
+      if (deleteError) throw deleteError;
+
+      if (rows.length) {
+        const { error: insertError } = await supabase
+          .from("availability")
+          .insert(rows);
+        if (insertError) throw insertError;
+      }
+
+      availabilityMsg.textContent = "Disponibilidade salva com sucesso!";
+    } catch (err) {
+      console.error("Erro ao salvar disponibilidade:", err);
+      availabilityMsg.textContent = err.message || "Erro ao salvar disponibilidade.";
+    } finally {
+      saveAvailabilityBtn.disabled = false;
+    }
+  });
 
   loadAvailability();
 
