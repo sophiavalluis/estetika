@@ -50,33 +50,65 @@ let selectedAddons = [];
   const photoStatus = document.getElementById("photoStatus");
   const confirmBookingButton = document.getElementById("confirmBooking");
 
-  // Mostra uma prévia de cada foto selecionada e confirma quantas serão anexadas.
-  photosInput?.addEventListener("change", () => {
-    const files = Array.from(photosInput.files || []);
+  // Mantém os arquivos entre diferentes aberturas do seletor.
+  // O comportamento nativo do input substitui a seleção anterior; aqui somamos
+  // os novos arquivos até o limite de 2 imagens.
+  let selectedPhotoFiles = [];
+
+  function renderPhotoPreview() {
+    if (!photoPreview || !photoStatus) return;
     photoPreview.innerHTML = "";
 
-    if (files.length > 2) {
-      photosInput.value = "";
-      photoStatus.textContent = "Você pode selecionar no máximo 2 imagens.";
-      return;
-    }
-
-    files.forEach((file, index) => {
-      if (!file.type.startsWith("image/")) return;
+    selectedPhotoFiles.forEach((file, index) => {
       const item = document.createElement("div");
       item.className = "photo-preview-item";
+
       const image = document.createElement("img");
       image.alt = `Foto de referência ${index + 1}`;
       image.src = URL.createObjectURL(file);
+
       const badge = document.createElement("span");
       badge.textContent = `Imagem ${index + 1}`;
-      item.append(image, badge);
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.textContent = "×";
+      removeButton.setAttribute("aria-label", `Remover imagem ${index + 1}`);
+      removeButton.style.cssText = "position:absolute;top:7px;right:7px;width:26px;height:26px;border:0;border-radius:50%;background:rgba(41,36,42,.82);color:#fff;font-size:19px;line-height:1;cursor:pointer;";
+      removeButton.addEventListener("click", () => {
+        selectedPhotoFiles.splice(index, 1);
+        renderPhotoPreview();
+      });
+
+      item.append(image, badge, removeButton);
       photoPreview.appendChild(item);
     });
 
-    photoStatus.textContent = files.length
-      ? `${files.length} ${files.length === 1 ? "imagem selecionada" : "imagens selecionadas"}.`
+    photoStatus.textContent = selectedPhotoFiles.length
+      ? `${selectedPhotoFiles.length} de 2 imagens selecionadas. Você ainda pode adicionar ${2 - selectedPhotoFiles.length}.`
       : "Você pode anexar até 2 imagens.";
+  }
+
+  photosInput?.addEventListener("change", () => {
+    const newlyChosenFiles = Array.from(photosInput.files || []);
+    const validFiles = newlyChosenFiles.filter(file => file.type.startsWith("image/"));
+    const invalidCount = newlyChosenFiles.length - validFiles.length;
+
+    const remainingSlots = 2 - selectedPhotoFiles.length;
+    const filesToAdd = validFiles.slice(0, Math.max(0, remainingSlots));
+    selectedPhotoFiles.push(...filesToAdd);
+
+    // Limpa o input para permitir selecionar novamente o mesmo arquivo,
+    // sem apagar a lista mantida em selectedPhotoFiles.
+    photosInput.value = "";
+
+    if (invalidCount) {
+      photoStatus.textContent = "Arquivos que não são imagens foram ignorados.";
+    } else if (validFiles.length > remainingSlots) {
+      photoStatus.textContent = "Limite de 2 imagens atingido. Remova uma imagem para adicionar outra.";
+    }
+
+    renderPhotoPreview();
   });
 
 async function carregarAddons() {
@@ -463,7 +495,7 @@ async function render(date) {
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const description = document.getElementById("description").value.trim();
-    const photoFiles = Array.from(document.getElementById("photos").files || []);
+    const photoFiles = [...selectedPhotoFiles];
     const date = document.getElementById("date").value;
     const serviceSelect = document.getElementById("service");
     const selectedService = serviceSelect.options[serviceSelect.selectedIndex];
@@ -543,8 +575,8 @@ async function render(date) {
       document.getElementById("phone").value = "";
       document.getElementById("description").value = "";
       document.getElementById("photos").value = "";
-      document.getElementById("photoPreview").innerHTML = "";
-      document.getElementById("photoStatus").textContent = "Você pode anexar até 2 imagens.";
+      selectedPhotoFiles = [];
+      renderPhotoPreview();
       document.querySelectorAll('#addonsList input[type="checkbox"]').forEach(cb => cb.checked = false);
       selectedSlot = null;
       calcularDuracaoTotal();
