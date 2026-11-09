@@ -182,7 +182,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const copyAgendaLink = async (link) => {
     const button = el("copiar");
-    const originalText = "▣  Copiar link";
+    const originalText = "Copiar link";
+    const buttonLabel = button.querySelector("span");
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(link);
@@ -198,16 +199,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         temp.remove();
         if (!copied) throw new Error("Não foi possível copiar automaticamente.");
       }
-      button.textContent = "Copiado!";
+      if (buttonLabel) buttonLabel.textContent = "Copiado!";
       button.setAttribute("aria-label", "Link copiado");
       window.setTimeout(() => {
-        button.textContent = originalText;
+        if (buttonLabel) buttonLabel.textContent = originalText;
         button.removeAttribute("aria-label");
       }, 1800);
     } catch (err) {
       console.error("Erro ao copiar link:", err);
-      button.textContent = "Selecione o link acima";
-      window.setTimeout(() => button.textContent = originalText, 2200);
+      if (buttonLabel) buttonLabel.textContent = "Copie o link acima";
+      window.setTimeout(() => {
+        if (buttonLabel) buttonLabel.textContent = originalText;
+      }, 2200);
     }
   };
   el("copiar").onclick = () => copyAgendaLink(fullLink);
