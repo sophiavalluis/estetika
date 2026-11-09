@@ -7,6 +7,7 @@
   <title>Meu Studio | Estétika</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -128,10 +129,12 @@
     </section>
     <section class="surface section-card">
       <div class="section-head">
-        <div><div class="eyebrow mb-2">Disponibilidade semanal</div><h2 class="section-title">Seus horários</h2><p class="subtle">Escolha em quais dias e períodos você atende.</p></div>
-        <div class="section-icon">▦</div>
+        <div><div class="eyebrow mb-2">Disponibilidade semanal</div><h2 class="section-title">Seus horários</h2><p class="subtle">Escolha os dias, horários e quantidade de cadeiras em que você atende.</p></div>
+        <div class="section-icon"><i data-lucide="calendar-days"></i></div>
       </div>
       <div id="availabilityList" class="space-y-3"></div>
+      <p id="availabilityMsg" class="subtle mt-3" role="status"></p>
+      <button id="saveAvailability" class="btn btn-primary w-full mt-3"><i data-lucide="calendar-check"></i> Salvar disponibilidade</button>
     </section>
   </div>
   <footer class="text-center subtle mt-8">Estétika <span class="mx-1">·</span> Seu talento, sua agenda, sua essência.</footer>
@@ -139,5 +142,6 @@
 
 
   <script src="index.js"></script>
+  <script>window.addEventListener("DOMContentLoaded", () => window.lucide?.createIcons());</script>
 </body>
 </html>
