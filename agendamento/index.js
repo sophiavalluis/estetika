@@ -348,135 +348,145 @@ serviceSelect.addEventListener("change", () => {
     document.getElementById("date").value;
 
   if (date) {
-    render(date);
+    render(date).catch(err => {
+      console.error(err);
+      timesDiv.textContent = err.message || "Erro ao carregar horários.";
+    });
   }
 
   calcularDuracaoTotal();
   
 });
 
-const slotInterval =
-  profile.slot_interval || 30;
+const slotInterval = Number(profile.slot_interval) || 30;
 
-const openTime =
-  profile.open_time || "09:00";
+// Datas do input são YYYY-MM-DD. Criamos a data em horário local para
+// evitar deslocamentos de fuso ao identificar o dia da semana.
+function getWeekdayFromDate(date) {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(year, month - 1, day).getDay();
+}
 
-const closeTime =
-  profile.close_time || "18:00";
+function normalizeTime(value) {
+  return String(value || "").slice(0, 5);
+}
 
-function gerarSlots() {
-
+function gerarSlots(openTime, closeTime) {
   const result = [];
+  let [h, m] = normalizeTime(openTime).split(":").map(Number);
+  const [hEnd, mEnd] = normalizeTime(closeTime).split(":").map(Number);
+  const interval = Math.max(1, slotInterval);
 
-  let [h, m] =
-    openTime.split(":").map(Number);
+  if (![h, m, hEnd, mEnd].every(Number.isFinite)) return result;
 
-  const [hEnd, mEnd] =
-    closeTime.split(":").map(Number);
+  let current = h * 60 + m;
+  const end = hEnd * 60 + mEnd;
 
-  while (
-    h < hEnd ||
-    (h === hEnd && m < mEnd)
-  ) {
-
-    const time =
-      `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-
-    result.push(time);
-
-    m += slotInterval;
-
-    if (m >= 60) {
-
-      h += Math.floor(m / 60);
-
-      m = m % 60;
-    }
+  while (current < end) {
+    const hour = Math.floor(current / 60);
+    const minute = current % 60;
+    result.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
+    current += interval;
   }
-
   return result;
 }
-  // 🔵 OCUPADOS
+
+// Busca somente os dados agregados necessários para calcular ocupação.
+// A função no banco nunca retorna nome, telefone, descrição ou fotos de clientes.
 async function getBusy(date) {
+  const { data, error } = await supabase.rpc("get_public_booking_occupancy", {
+    p_username: username,
+    p_date: date
+  });
 
-  const { data } = await supabase
-    .from("appointments")
-    .select("*")
-    .eq("date", date)
-    .eq("user_id", ownerId);
+  if (error) {
+    console.error("Erro ao consultar ocupação dos horários:", error);
+    throw new Error("Não foi possível verificar os horários ocupados. Tente novamente.");
+  }
 
-  return data || [];
+  return (data || []).flatMap(row =>
+    Array.from({ length: Number(row.appointment_count) || 0 }, () => ({
+      time: row.appointment_time,
+      duration: Number(row.appointment_duration) || 30
+    }))
+  );
 }
 
-  // 🔵 RENDER HORÁRIOS
+// Renderiza a agenda usando a disponibilidade específica do dia selecionado.
 async function render(date) {
-
   timesDiv.innerHTML = "";
 
   if (!date) return;
 
-  const appointments = await getBusy(date);
-  const capacity = profile.capacity || 1;
+  const weekday = getWeekdayFromDate(date);
+  const { data: dayAvailability, error: availabilityError } = await supabase
+    .from("availability")
+    .select("weekday, open_time, close_time, chairs")
+    .eq("user_id", ownerId)
+    .eq("weekday", weekday)
+    .maybeSingle();
 
-  slots = gerarSlots();
+  if (availabilityError) {
+    console.error("Erro ao carregar disponibilidade do dia:", availabilityError);
+    timesDiv.textContent = "Não foi possível carregar a disponibilidade deste dia.";
+    return;
+  }
+
+  if (!dayAvailability) {
+    timesDiv.textContent = "Este studio não atende neste dia.";
+    return;
+  }
+
+  const capacity = Math.max(1, Number(dayAvailability.chairs) || 1);
+  const appointments = await getBusy(date);
+  slots = gerarSlots(dayAvailability.open_time, dayAvailability.close_time);
+
+  if (!slots.length) {
+    timesDiv.textContent = "Não há horários disponíveis para este dia.";
+    return;
+  }
 
   const now = new Date();
   const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   slots.forEach(t => {
-
     const btn = document.createElement("button");
+    btn.type = "button";
     btn.innerText = t;
 
     let ocupados = 0;
+    const [th, tm] = t.split(":").map(Number);
+    const slotMinutes = th * 60 + tm;
 
     appointments.forEach(app => {
+      const duration = Number(app.duration) || 30;
+      const [ah, am] = normalizeTime(app.time).split(":").map(Number);
+      const start = ah * 60 + am;
+      const finish = start + duration;
 
-      const duracao = app.duration || 30;
-
-      const [ah, am] = app.time.split(":").map(Number);
-
-      const inicio = ah * 60 + am;
-      const fim = inicio + duracao;
-
-      const [th, tm] = t.split(":").map(Number);
-
-      const atual = th * 60 + tm;
-
-      if (atual >= inicio && atual < fim) {
+      if (slotMinutes >= start && slotMinutes < finish) {
         ocupados++;
       }
-
     });
 
-    const [slotHour, slotMinute] = t.split(":").map(Number);
-    const slotMinutes = slotHour * 60 + slotMinute;
     const isPast = date === todayString && slotMinutes <= currentMinutes;
 
     if (ocupados >= capacity || isPast) {
       btn.disabled = true;
       btn.title = isPast ? "Este horário já passou" : "Horário indisponível";
+      btn.className = "bg-gray-100 border border-gray-200 p-2 rounded-xl opacity-60 cursor-not-allowed";
     } else {
-
-      btn.className =
-        "bg-white hover:bg-[#696969] border border-[#696969] p-2 rounded-xl transition";
-
+      btn.className = "bg-white hover:bg-[#696969] border border-[#696969] p-2 rounded-xl transition";
       btn.onclick = () => {
-
         selectedSlot = t;
-
-        document.querySelectorAll("#times button")
-          .forEach(b => b.classList.remove("selected"));
+        document.querySelectorAll("#times button").forEach(b => b.classList.remove("selected"));
         btn.classList.add("selected");
-
       };
     }
 
     timesDiv.appendChild(btn);
-
   });
-
 }
 
   const dateInput = document.getElementById("date");
@@ -486,7 +496,10 @@ async function render(date) {
 
   dateInput.addEventListener("change", (e) => {
     selectedSlot = null;
-    render(e.target.value);
+    render(e.target.value).catch(err => {
+      console.error(err);
+      timesDiv.textContent = err.message || "Erro ao carregar horários.";
+    });
   });
 
   
@@ -580,7 +593,7 @@ async function render(date) {
       document.querySelectorAll('#addonsList input[type="checkbox"]').forEach(cb => cb.checked = false);
       selectedSlot = null;
       calcularDuracaoTotal();
-      render(date);
+      await render(date);
 
     } catch (err) {
       console.error("Erro ao realizar agendamento:", err);
