@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!user) return (window.location.href = "/login/");
 
   const el = (id) => document.getElementById(id);
+  window.lucide?.createIcons();
 
   const studioInput = el("studio");
   const usernameInput = el("username");
@@ -19,6 +20,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   const availabilityList = el("availabilityList");
   const backgroundBlur = el("backgroundBlur");
   const themeColorInput = el("themeColor");
+  const logoPreview = el("logoCurrentPreview");
+  const backgroundPreview = el("backgroundCurrentPreview");
+  let removeLogoRequested = false;
+  let removeBackgroundRequested = false;
+
+  const applyTheme = (color) => {
+    document.documentElement.style.setProperty("--rose", color);
+    document.documentElement.style.setProperty("--rose-dark", color);
+    document.querySelectorAll(".btn-primary").forEach(button => button.style.backgroundColor = color);
+    document.querySelectorAll(".btn-primary").forEach(button => button.style.boxShadow = `0 7px 16px ${color}2b`);
+    el("themePalette")?.querySelectorAll(".color-swatch").forEach(button => {
+      button.classList.toggle("selected", button.dataset.color.toLowerCase() === color.toLowerCase());
+    });
+  };
+
+  const updateBackgroundPreview = (url) => {
+    backgroundPreview.src = url || "https://placehold.co/600x180/png?text=Sem+imagem+de+fundo";
+    backgroundBlur.style.backgroundImage = url ? `url("${url}")` : "linear-gradient(135deg, #fbe4d8, #f8d7e0)";
+  };
+
+  const updateLogoPreview = (url) => {
+    const fallback = "https://placehold.co/96x96/png?text=Logo";
+    logoPreview.src = url || fallback;
+    preview.src = url || fallback;
+  };
+
+  const getStoragePath = (publicUrl, bucket) => {
+    if (!publicUrl) return null;
+    try {
+      const marker = `/storage/v1/object/public/${bucket}/`;
+      const index = publicUrl.indexOf(marker);
+      return index >= 0 ? decodeURIComponent(publicUrl.slice(index + marker.length).split("?")[0]) : null;
+    } catch { return null; }
+  };
 
   let profileData = null;
 
@@ -64,10 +99,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   usernameInput.value = profile.username || "";
   studioTitle.textContent = profile.studio_name || "Meu Studio";
 
-  if (profile.logo_url) preview.src = profile.logo_url;
+  updateLogoPreview(profile.logo_url);
+  el("logoStatus").textContent = profile.logo_url ? "Logo atual carregada." : "Nenhuma logo carregada.";
+  el("backgroundStatus").textContent = profile.background_url ? "Imagem de fundo atual carregada." : "Nenhuma imagem de fundo carregada.";
+  backgroundPreview.src = profile.background_url || "https://placehold.co/600x180/png?text=Sem+imagem+de+fundo";
 
   const theme = profile.theme_color || "#CFCFCF";
   themeColorInput.value = theme;
+  applyTheme(theme);
 
   if (profile.background_url) {
     backgroundBlur.style.backgroundImage = `url('${profile.background_url}')`;
@@ -75,6 +114,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     backgroundBlur.style.backgroundImage =
       "linear-gradient(135deg, #fbe4d8, #f8d7e0)";
   }
+
+  el("themePalette").querySelectorAll(".color-swatch").forEach(button => {
+    button.addEventListener("click", () => {
+      themeColorInput.value = button.dataset.color;
+      applyTheme(button.dataset.color);
+    });
+  });
+
+  el("logoFile").addEventListener("change", () => {
+    const file = el("logoFile").files?.[0];
+    if (file) {
+      removeLogoRequested = false;
+      updateLogoPreview(URL.createObjectURL(file));
+      el("logoStatus").textContent = `Nova logo selecionada: ${file.name}`;
+    }
+  });
+
+  el("backgroundFile").addEventListener("change", () => {
+    const file = el("backgroundFile").files?.[0];
+    if (file) {
+      removeBackgroundRequested = false;
+      const url = URL.createObjectURL(file);
+      backgroundPreview.src = url;
+      backgroundBlur.style.backgroundImage = `url("${url}")`;
+      el("backgroundStatus").textContent = `Nova imagem selecionada: ${file.name}`;
+    }
+  });
+
+  el("removeLogo").addEventListener("click", () => {
+    removeLogoRequested = true;
+    el("logoFile").value = "";
+    updateLogoPreview(null);
+    el("logoStatus").textContent = "A logo será removida ao salvar.";
+  });
+
+  el("removeBackground").addEventListener("click", () => {
+    removeBackgroundRequested = true;
+    el("backgroundFile").value = "";
+    updateBackgroundPreview(null);
+    el("backgroundStatus").textContent = "A imagem de fundo será removida ao salvar.";
+  });
 
   const usernameRaw = (profile.username || "").trim();
   const safeUsername = encodeURIComponent(usernameRaw || "usuario");
@@ -137,13 +217,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (logoFile) {
         const path = `logos/${user.id}-${Date.now()}`;
-        await supabase.storage.from("logos").upload(path, logoFile, { upsert: true });
+        const { error: uploadError } = await supabase.storage.from("logos").upload(path, logoFile, { upsert: true });
+        if (uploadError) throw uploadError;
         logo_url = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
 
       if (backgroundFile) {
         const path = `backgrounds/${user.id}-${Date.now()}`;
-        await supabase.storage.from("backgrounds").upload(path, backgroundFile, { upsert: true });
+        const { error: uploadError } = await supabase.storage.from("backgrounds").upload(path, backgroundFile, { upsert: true });
+        if (uploadError) throw uploadError;
         background_url = supabase.storage.from("backgrounds").getPublicUrl(path).data.publicUrl;
       }
 
@@ -157,11 +239,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (error) throw error;
 
-      msg.textContent = "Salvo com sucesso!";
+      // Atualiza imediatamente a interface sem recarregar a página.
+      profileData = { ...profileData, studio_name, username, logo_url, background_url, theme_color };
+      studioTitle.textContent = studio_name || "Meu Studio";
+      updateLogoPreview(logo_url);
+      updateBackgroundPreview(background_url);
+      applyTheme(theme_color);
+      el("logoStatus").textContent = logo_url ? "Logo atual carregada." : "Nenhuma logo carregada.";
+      el("backgroundStatus").textContent = background_url ? "Imagem de fundo atual carregada." : "Nenhuma imagem de fundo carregada.";
+      el("logoFile").value = "";
+      el("backgroundFile").value = "";
+      removeLogoRequested = false;
+      removeBackgroundRequested = false;
 
+      const updatedUsername = encodeURIComponent((username || "").trim() || "usuario");
+      const updatedLink = `https://agenda-beleza-eta.vercel.app/agendamento.html?studio=${updatedUsername}`;
+      publicLink.innerHTML = `<a href="${updatedLink}" target="_blank" class="text-[#A9A9A9] break-all font-semibold">${updatedLink}</a>`;
+      el("abrirAgenda").onclick = () => window.open(updatedLink, "_blank");
+      el("copiar").onclick = async () => {
+        try { await navigator.clipboard.writeText(updatedLink); el("copiar").textContent = "Copiado!"; }
+        catch { const temp = document.createElement("input"); document.body.appendChild(temp); temp.value = updatedLink; temp.select(); document.execCommand("copy"); temp.remove(); }
+      };
+
+      // Remove arquivos antigos somente depois de o perfil ser salvo.
+      if (oldLogoUrl && oldLogoUrl !== logo_url) {
+        const oldPath = getStoragePath(oldLogoUrl, "logos");
+        if (oldPath) {
+          const { error: removeError } = await supabase.storage.from("logos").remove([oldPath]);
+          if (removeError) console.warn("Perfil salvo, mas não foi possível remover a logo antiga:", removeError);
+        }
+      }
+      if (oldBackgroundUrl && oldBackgroundUrl !== background_url) {
+        const oldPath = getStoragePath(oldBackgroundUrl, "backgrounds");
+        if (oldPath) {
+          const { error: removeError } = await supabase.storage.from("backgrounds").remove([oldPath]);
+          if (removeError) console.warn("Perfil salvo, mas não foi possível remover a imagem antiga:", removeError);
+        }
+      }
+
+      msg.textContent = "Salvo com sucesso! Tudo atualizado.";
     } catch (err) {
       console.error(err);
-      msg.textContent = "Erro ao salvar";
+      msg.textContent = err.message || "Erro ao salvar. Confira os arquivos e tente novamente.";
     }
   };
 
