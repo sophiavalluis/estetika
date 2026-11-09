@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("password").value;
 
       msg.className =
-        "text-center text-sm mt-4 text-[#555555] min-h-[20px]";
+        "text-center text-sm mt-4 text-[#987f8b] min-h-[20px]";
 
       msg.innerText = "Entrando...";
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (error || !data?.user || !data?.session) {
         msg.className =
-          "text-center text-sm mt-4 text-[#b4534b] min-h-[20px]";
+          "text-center text-sm mt-4 text-[#bd5575] min-h-[20px]";
         msg.innerText = error?.message || "Login inválido";
         return;
       }
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       msg.className =
-        "text-center text-sm mt-4 text-[#555555] min-h-[20px]";
+        "text-center text-sm mt-4 text-[#987f8b] min-h-[20px]";
 
       msg.innerText = "Criando conta...";
 
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (error) {
         msg.className =
-          "text-center text-sm mt-4 text-[#b4534b] min-h-[20px]";
+          "text-center text-sm mt-4 text-[#bd5575] min-h-[20px]";
         msg.innerText = error.message;
         return;
       }
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       msg.className =
-        "text-center text-sm mt-4 text-[#657b5a] min-h-[20px]";
+        "text-center text-sm mt-4 text-[#718b73] min-h-[20px]";
 
       msg.innerText =
         "Conta criada! Verifique seu email ou clique em entrar.";
