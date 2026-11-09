@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fbf7f8">
+  <meta name="description" content="Agende seu atendimento no Estétika.">
+  <link rel="icon" type="image/png" href="img/estetika.png">
+  <title>Agende seu horário | Estétika</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#29242a;--muted:#89818a;--line:#eee5e9;--rose:#c77f98;--rose-dark:#a95f7b;--canvas:#fbf7f8;--soft:#f8eef2;--shadow:0 24px 70px rgba(67,43,56,.09)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;font-family:'DM Sans',sans-serif;color:var(--ink);background:radial-gradient(ellipse at 6% 4%,rgba(235,196,210,.34),transparent 34%),radial-gradient(ellipse at 96% 30%,rgba(225,213,226,.35),transparent 32%),var(--canvas)}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:radial-gradient(#c9aab7 .7px,transparent .7px);background-size:24px 24px;mask-image:linear-gradient(to bottom,black,transparent 72%)}
+    h1,h2,h3{font-family:'Manrope',sans-serif;letter-spacing:-.04em}button,input,select,textarea{font:inherit}button{cursor:pointer}
+    .page{width:min(100% - 32px,760px);margin:38px auto 60px;position:relative;z-index:1}
+    .brand{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:22px;color:#514650;font:800 13px Manrope,sans-serif;letter-spacing:.02em}.brand img{width:27px;height:27px;object-fit:contain}
+    .booking-card{overflow:hidden;background:rgba(255,255,255,.94);border:1px solid rgba(238,229,233,.95);border-radius:30px;box-shadow:var(--shadow)}
+    .hero{position:relative;padding:34px 34px 28px;background:linear-gradient(135deg,#fff 0%,#fff8fb 58%,#f8eef3 100%);text-align:center;border-bottom:1px solid #f1e7eb}.hero:after{content:"";position:absolute;width:210px;height:210px;border-radius:50%;right:-80px;top:-125px;background:rgba(222,180,197,.16)}
+    .logo-wrap{position:relative;z-index:1;width:96px;height:96px;margin:0 auto 17px;padding:5px;border-radius:28px;background:#fff;border:1px solid #f0e3e9;box-shadow:0 12px 28px rgba(80,48,64,.1)}
+    #logo{width:100%;height:100%;border-radius:23px;object-fit:cover;background:#f7edf1}
+    #studioName{position:relative;z-index:1;margin:0;font-size:clamp(24px,5vw,32px);font-weight:800;line-height:1.15}
+    .hero-subtitle{position:relative;z-index:1;margin:9px 0 0;color:var(--muted);font-size:13px}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;margin-top:15px;padding:7px 11px;border:1px solid #efdee6;border-radius:999px;background:rgba(255,255,255,.75);color:#936276;font-size:10px;font-weight:700;letter-spacing:.04em}.hero-tag svg{width:13px;height:13px}
+    .form-content{padding:30px 34px 34px}.section-heading{display:flex;align-items:center;gap:12px;margin:0 0 18px}
+    .section-heading .step{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:12px;background:var(--soft);color:var(--rose-dark);font:800 12px Manrope}
+    .section-heading h2{margin:0;font-size:16px;font-weight:800}.section-heading p{margin:3px 0 0;color:var(--muted);font-size:11px}
+    .field-group{margin-bottom:22px}.field-label{display:flex;align-items:center;gap:7px;margin-bottom:8px;font-size:12px;font-weight:700;color:#514650}
+    .field-label svg{width:15px;height:15px;color:var(--rose-dark)}.field{width:100%;min-height:48px;padding:12px 14px;border:1px solid #e9dfe4;border-radius:14px;background:#fff;color:var(--ink);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+    .field:focus{border-color:#d6a0b3;box-shadow:0 0 0 4px rgba(199,127,152,.13)}select.field{cursor:pointer}
+    .service-description{padding:15px 16px;border:1px solid #f0e3e9;border-radius:16px;background:#fff8fb;margin:-7px 0 20px}
+    .service-description-title{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#8d5c71;margin-bottom:5px}.service-description-title svg{width:15px;height:15px}
+    #serviceDescriptionText{font-size:12px;line-height:1.65;color:#756b75;margin:0;white-space:pre-wrap}
+    #addonsArea{margin:0 0 22px}.addon-item{display:flex;align-items:center;gap:11px;padding:13px 14px;border:1px solid var(--line);border-radius:15px;background:#fff;cursor:pointer;transition:.18s}
+    .addon-item:hover{border-color:#dfb5c5;background:#fffafd}.addon-item input{accent-color:var(--rose);width:16px;height:16px;flex:none}.addon-item span{font-size:12px;color:#5c535d}
+    #totalsArea{margin-top:12px;padding:15px 16px;border-radius:16px;background:#faf4f7;border:1px solid #f1e4ea}
+    #totalPrice{margin:0;font-weight:800;font-size:14px;color:#6f4358}#totalPrice svg{width:15px;height:15px;vertical-align:-3px;margin-right:5px}
+    #totalDuration{margin:5px 0 0;font-size:11px;color:var(--muted)}
+    .date-time-grid{display:grid;grid-template-columns:1fr;gap:14px}#date{color-scheme:light}
+    .times-label-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}.times-label-row .field-label{margin:0}
+    .tiny-note{font-size:10px;color:#a198a0}#times{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:10px}
+    #times button{min-height:43px;padding:10px 7px;border:1px solid #eadfe5;border-radius:12px;background:#fff;color:#655963;font-size:12px;font-weight:700;transition:.18s}
+    #times button:not(:disabled):hover{border-color:#d5a0b4;background:#fff7fa;transform:translateY(-1px)}
+    #times button.selected{background:var(--rose)!important;border-color:var(--rose)!important;color:#fff!important;box-shadow:0 7px 16px rgba(199,127,152,.22)}
+    #times button:disabled{background:#f3f0f2!important;border-color:#ece7ea!important;color:#b7afb6!important;cursor:not-allowed;text-decoration:line-through;opacity:.8}
+    .empty-times{grid-column:1/-1;padding:18px;border:1px dashed #e7dce2;border-radius:14px;background:#fcf9fb;color:#9a9099;text-align:center;font-size:12px}
+    .form-divider{height:1px;background:var(--line);margin:25px 0}textarea.field{min-height:112px;resize:vertical;line-height:1.6}.field-help{margin:6px 0 0;color:#a198a0;font-size:10px}
+    .upload-box{padding:16px;border:1px dashed #dfcbd5;border-radius:17px;background:#fffafd}.upload-head{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+    .upload-icon{display:grid;place-items:center;width:35px;height:35px;border-radius:12px;background:#f6e8ee;color:#a95f7b}.upload-icon svg{width:17px;height:17px}
+    .upload-head strong{display:block;font-size:12px}.upload-head small{display:block;margin-top:3px;font-size:10px;color:var(--muted)}
+    #photos{width:100%;font-size:11px;color:#7d727d}#photos::file-selector-button{margin-right:10px;padding:9px 12px;border:0;border-radius:9px;background:#f3e5eb;color:#8d526b;font-weight:700;cursor:pointer}
+    #photoPreview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+    .photo-preview-item{position:relative;overflow:hidden;border:1px solid #eee1e7;border-radius:13px;background:#fff;aspect-ratio:4/3}.photo-preview-item img{width:100%;height:100%;object-fit:cover}
+    .photo-preview-item span{position:absolute;left:7px;bottom:7px;padding:4px 7px;border-radius:7px;background:rgba(41,36,42,.72);color:white;font-size:9px}
+    #photoStatus{font-size:10px;color:var(--muted);margin:9px 0 0}
+    .submit-button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:54px;margin-top:25px;border:0;border-radius:16px;background:linear-gradient(135deg,#c77f98,#b66f89);color:#fff;font-size:13px;font-weight:800;box-shadow:0 10px 22px rgba(199,127,152,.24);transition:transform .2s,box-shadow .2s,opacity .2s}
+    .submit-button:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(199,127,152,.3)}.submit-button:disabled{opacity:.65;cursor:wait;transform:none}.submit-button svg{width:17px;height:17px}
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:6px;margin:13px 0 0;color:#a198a0;font-size:10px}.secure-note svg{width:13px;height:13px}
+    .footer{padding:19px 10px 0;text-align:center;color:#a198a0;font-size:10px}.footer b{color:#8e7582}.hidden{display:none!important}
+    @media(min-width:650px){.date-time-grid{grid-template-columns:1fr 1fr;align-items:start}}
+    @media(max-width:560px){.page{width:min(100% - 20px,760px);margin:14px auto 35px}.booking-card{border-radius:23px}.hero{padding:27px 20px 23px}.form-content{padding:23px 20px 25px}#times{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.section-heading{margin-bottom:15px}}
+    @media(max-width:360px){#times{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="brand"><img src="../img/estetika.png" alt=""><span>estétika</span></div>
+    <article class="booking-card">
+      <header class="hero">
+        <div class="logo-wrap"><img id="logo" src="https://placehold.co/100x100/png" alt="Logo do studio"></div>
+        <h1 id="studioName">Studio</h1>
+        <p class="hero-subtitle">Reserve seu momento de cuidado e beleza.</p>
+        <span class="hero-tag"><i data-lucide="sparkles"></i> Agendamento online</span>
+      </header>
+      <div class="form-content">
+        <section class="field-group">
+          <div class="section-heading"><span class="step">01</span><div><h2>Escolha seu atendimento</h2><p>Selecione o serviço que deseja realizar.</p></div></div>
+          <label class="field-label" for="service"><i data-lucide="scissors"></i> Serviço</label>
+          <select id="service" class="field"><option>Carregando serviços...</option></select>
+        </section>
+        <div id="serviceDescription" class="service-description hidden">
+          <div class="service-description-title"><i data-lucide="info"></i> Sobre este serviço</div>
+          <p id="serviceDescriptionText"></p>
+        </div>
+        <div id="addonsArea" class="hidden">
+          <label class="field-label"><i data-lucide="plus-circle"></i> Personalize com adicionais</label>
+          <div id="addonsList" class="grid gap-2"></div>
+          <div id="totalsArea"><p id="totalPrice"><i data-lucide="wallet"></i> Total: R$ 0,00</p><p id="totalDuration">Tempo total: 0 min</p></div>
+        </div>
+        <section class="field-group">
+          <div class="section-heading"><span class="step">02</span><div><h2>Escolha data e horário</h2><p>Os horários disponíveis aparecem após selecionar a data.</p></div></div>
+          <div class="date-time-grid">
+            <div><label class="field-label" for="date"><i data-lucide="calendar-days"></i> Data</label><input type="date" id="date" class="field"></div>
+            <div><div class="times-label-row"><label class="field-label"><i data-lucide="clock-3"></i> Horários</label><span class="tiny-note">Selecione um horário</span></div><div id="times"><div class="empty-times">Escolha uma data para ver os horários.</div></div></div>
+          </div>
+        </section>
+        <div class="form-divider"></div>
+        <section class="field-group">
+          <div class="section-heading"><span class="step">03</span><div><h2>Seus dados</h2><p>Informe seus dados para confirmar a reserva.</p></div></div>
+          <label class="field-label" for="name"><i data-lucide="user-round"></i> Nome completo</label>
+          <input id="name" autocomplete="name" placeholder="Como podemos te chamar?" class="field mb-3">
+          <label class="field-label" for="phone"><i data-lucide="message-circle"></i> WhatsApp</label>
+          <input id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(11) 99999-9999" class="field mb-4">
+          <label class="field-label" for="description"><i data-lucide="notebook-pen"></i> Observações <span class="tiny-note">(opcional)</span></label>
+          <textarea id="description" maxlength="500" placeholder="Conte algum detalhe importante para o seu atendimento..." class="field"></textarea>
+          <p class="field-help">Até 500 caracteres.</p>
+        </section>
+        <section class="field-group">
+          <label class="field-label"><i data-lucide="images"></i> Fotos de referência <span class="tiny-note">(opcional)</span></label>
+          <div class="upload-box">
+            <div class="upload-head"><span class="upload-icon"><i data-lucide="image-plus"></i></span><div><strong>Inspire seu atendimento</strong><small>Envie até 2 imagens para mostrar sua referência.</small></div></div>
+            <input type="file" id="photos" accept="image/*" multiple>
+            <div id="photoPreview"></div><p id="photoStatus">Você pode anexar até 2 imagens.</p>
+          </div>
+        </section>
+        <button id="confirmBooking" class="submit-button" type="button" onclick="agendar()"><i data-lucide="calendar-check"></i><span>Confirmar agendamento</span></button>
+        <p class="secure-note"><i data-lucide="shield-check"></i> Seus dados são usados para organizar seu atendimento.</p>
+      </div>
+    </article>
+    <footer class="footer">Feito com carinho por <b>Estétika</b> · Seu talento, sua agenda, sua essência.</footer>
+  </main>
+  <script src="agendamento/index.js"></script>
+  <script>window.addEventListener("DOMContentLoaded", () => window.lucide?.createIcons());</script>
+</body>
+</html>
