@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const supabase = window.supabase.createClient(
     "https://nxbqhwubyeayzgnncxsk.supabase.co",
-    "sb_publishable_xq8o46ej843IL_PeYNeqtw_ShRZIIiQJykzgLO4kZkJZ8qNbv3549rG_JuwcVEZDrKA"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54YnFod3VieWVheXpnbm5jeHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NDcyODIsImV4cCI6MjEwNzUyMzI4Mn0.pjHTY7d3Nxwo-bX4JOAjy6plkbhVkb3MhXZTA-Fq4qM"
   );
 
   const params = new URLSearchParams(window.location.search);
