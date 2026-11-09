@@ -69,6 +69,19 @@
     #availabilityList input[type=checkbox]{accent-color:var(--rose)}
     #msg{font-size:12px;color:#6e9b7b}
     .status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:99px;background:#f4f7f3;color:#71896d;font-size:10px;font-weight:700}
+ 
+    .asset-preview{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff}
+    #logoCurrentPreview{width:82px;height:82px;object-fit:cover;border-radius:18px;border:1px solid var(--line);background:#f7f2f4;flex:none}
+    .asset-actions{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
+    .btn-danger-soft{background:#fff5f5;color:#b4535b;border:1px solid #f2d9dc}
+    .btn-danger-soft:hover{background:#fdebed}
+    .color-palette{display:flex;flex-wrap:wrap;gap:10px;padding:11px;background:#fff;border:1px solid var(--line);border-radius:14px}
+    .color-swatch{width:34px;height:34px;border-radius:50%;background:var(--swatch);border:3px solid white;box-shadow:0 0 0 1px #e8e1e5;cursor:pointer;transition:.18s}
+    .color-swatch:hover{transform:scale(1.08)}
+    .color-swatch.selected{box-shadow:0 0 0 3px var(--swatch);transform:scale(1.05)}
+    .background-preview-wrap{height:130px;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#f5eef1}
+    #backgroundCurrentPreview{width:100%;height:100%;object-fit:cover}
+    @media(max-width:480px){.asset-preview{align-items:flex-start;flex-direction:column}.asset-actions{width:100%}.color-swatch{width:30px;height:30px}}
     @media(max-width:700px){.shell{padding:24px 14px 42px}.hero{grid-template-columns:1fr;padding:21px}.action-row{display:grid;grid-template-columns:1fr 1fr}.action-row .btn{padding:12px 9px}.section-grid{grid-template-columns:1fr}.section-card{padding:20px}.link-panel{align-items:flex-start;flex-direction:column}.link-panel .btn{width:100%}}
     @media(max-width:390px){#availabilityList{grid-template-columns:1fr}.profile-row{gap:13px}#preview{width:76px;height:76px;border-radius:21px}#studioTitle{font-size:21px}}
   </style>
@@ -116,9 +129,42 @@
     <div class="grid sm:grid-cols-2 gap-x-5">
       <div class="field-block"><label class="field-label" for="studio">Nome do studio</label><input id="studio" placeholder="Ex.: Studio Bella" class="field"></div>
       <div class="field-block"><label class="field-label" for="username">Link personalizado</label><input id="username" placeholder="seu-studio" class="field"><p class="hint">Esse nome identifica seu link público.</p></div>
-      <div class="field-block"><label class="field-label" for="logoFile">Logo ou foto do studio</label><input type="file" id="logoFile" class="field" accept="image/*"></div>
-      <div class="field-block"><label class="field-label" for="themeColor">Cor de destaque</label><input type="color" id="themeColor" class="field"></div>
-      <div class="field-block sm:col-span-2"><label class="field-label" for="backgroundFile">Imagem de fundo</label><input type="file" id="backgroundFile" class="field" accept="image/*"><p class="hint">Escolha uma imagem que represente a identidade do seu studio.</p></div>
+      <div class="field-block">
+        <label class="field-label" for="logoFile">Logo do studio</label>
+        <div class="asset-preview">
+          <img id="logoCurrentPreview" src="https://placehold.co/96x96/png?text=Logo" alt="Prévia da logo">
+          <div class="asset-actions">
+            <input type="file" id="logoFile" class="field" accept="image/*">
+            <button type="button" id="removeLogo" class="btn btn-danger-soft"><i data-lucide="trash-2"></i> Excluir logo atual</button>
+            <p class="hint" id="logoStatus">Nenhuma logo carregada.</p>
+          </div>
+        </div>
+      </div>
+      <div class="field-block">
+        <label class="field-label">Cor de destaque</label>
+        <div id="themePalette" class="color-palette" role="group" aria-label="Escolha a cor de destaque">
+          <button type="button" class="color-swatch" data-color="#C77F98" style="--swatch:#C77F98" aria-label="Rosa antigo"></button>
+          <button type="button" class="color-swatch" data-color="#B76E79" style="--swatch:#B76E79" aria-label="Rosa queimado"></button>
+          <button type="button" class="color-swatch" data-color="#D4A373" style="--swatch:#D4A373" aria-label="Champagne"></button>
+          <button type="button" class="color-swatch" data-color="#9A8C98" style="--swatch:#9A8C98" aria-label="Lavanda"></button>
+          <button type="button" class="color-swatch" data-color="#7D9B91" style="--swatch:#7D9B91" aria-label="Verde sálvia"></button>
+          <button type="button" class="color-swatch" data-color="#6D8299" style="--swatch:#6D8299" aria-label="Azul acinzentado"></button>
+          <button type="button" class="color-swatch" data-color="#302A31" style="--swatch:#302A31" aria-label="Grafite"></button>
+        </div>
+        <input type="hidden" id="themeColor" value="#C77F98">
+        <p class="hint">Escolha uma tonalidade que combine com a identidade do seu studio.</p>
+      </div>
+      <div class="field-block sm:col-span-2">
+        <label class="field-label" for="backgroundFile">Imagem de fundo</label>
+        <div class="background-preview-wrap">
+          <img id="backgroundCurrentPreview" src="https://placehold.co/600x180/png?text=Imagem+de+fundo" alt="Prévia da imagem de fundo">
+        </div>
+        <div class="asset-actions mt-3">
+          <input type="file" id="backgroundFile" class="field" accept="image/*">
+          <button type="button" id="removeBackground" class="btn btn-danger-soft"><i data-lucide="trash-2"></i> Excluir imagem de fundo</button>
+          <p class="hint" id="backgroundStatus">Nenhuma imagem de fundo carregada.</p>
+        </div>
+      </div>
     </div>
     <div class="divider"></div>
     <div class="flex flex-wrap items-center justify-between gap-3"><p id="msg" class="m-0"></p><button id="salvar" class="btn btn-primary min-w-[150px]">Salvar alterações</button></div>
