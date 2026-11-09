@@ -30,6 +30,10 @@
     .tab{border:1px solid transparent;background:transparent;color:#817780}.tab.active{background:#302a30;color:white;box-shadow:0 6px 16px rgba(48,42,48,.12)}
     .appointment{transition:transform .2s,box-shadow .2s}.appointment:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(70,48,61,.09)}
     button{cursor:pointer}
+    .day-filter{border:1px solid #eee1e7;background:#fff;color:#786b74;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;transition:.18s}
+    .day-filter:hover{border-color:#d9b4c4;background:#fffafd;color:#9e607b}
+    .day-filter.active{background:#bd7892;border-color:#bd7892;color:#fff;box-shadow:0 5px 14px rgba(189,120,146,.2)}
+    .photo-preview{cursor:zoom-in}
     @media(max-width:640px){.page-wrap{padding:18px!important}.top-actions{width:100%}.top-actions a{flex:1}}
   </style>
 </head>
@@ -65,6 +69,23 @@
         <button onclick="filtrar('booked')" id="btn-booked" class="tab active action"><i data-lucide="calendar-clock" class="icon"></i>Agendados</button>
         <button onclick="filtrar('done')" id="btn-done" class="tab action"><i data-lucide="check-circle-2" class="icon"></i>Concluídos</button>
         <button onclick="filtrar('cancelled')" id="btn-cancelled" class="tab action"><i data-lucide="calendar-x" class="icon"></i>Cancelados</button>
+      </div>
+      <div class="surface rounded-[24px] p-4 md:p-5 mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <p class="text-[10px] uppercase tracking-[.18em] font-bold text-[#b17a90] mb-1">VISUALIZAÇÃO DA AGENDA</p>
+            <h3 class="font-extrabold text-lg text-[#302a30]">Filtrar atendimentos</h3>
+          </div>
+          <label for="filtroMes" class="flex items-center gap-2 text-sm font-semibold text-[#675b64]">
+            <i data-lucide="calendar-range" class="icon text-[#b17a90]"></i>
+            <span class="sr-only">Mês da agenda</span>
+            <select id="filtroMes" class="rounded-xl border border-[#eadde3] bg-[#fffafd] px-3 py-2.5 text-sm text-[#514850] outline-none focus:border-[#c889a3] focus:ring-4 focus:ring-[#f7eaf0]"></select>
+          </label>
+        </div>
+        <div class="flex flex-wrap gap-2" id="filtrosDias" aria-label="Filtrar por dia da semana">
+          <button type="button" data-dia="all" class="day-filter active">Todos os dias</button>
+        </div>
+        <p class="text-xs text-[#9a8d96] mt-3">Escolha um dia da semana e/ou um mês para localizar seus agendamentos.</p>
       </div>
     </section>
 
