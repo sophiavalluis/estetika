@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return (window.location.href = "login.html");
+  if (!user) return (window.location.href = "/login/");
 
   const el = (id) => document.getElementById(id);
 
