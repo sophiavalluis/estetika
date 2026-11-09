@@ -321,16 +321,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   let slotIntervalValue = 30;
 
   // ================= AVAILABILITY =================
-  // Mantém o mesmo formato usado pela tela antiga de disponibilidade:
-  // weekday (texto), open_time, close_time e chairs.
+  // O banco armazena weekday como INTEGER, seguindo Date.getDay():
+  // 0 = domingo, 1 = segunda, ..., 6 = sábado.
   const dias = [
-    { key: "monday", label: "Segunda-feira" },
-    { key: "tuesday", label: "Terça-feira" },
-    { key: "wednesday", label: "Quarta-feira" },
-    { key: "thursday", label: "Quinta-feira" },
-    { key: "friday", label: "Sexta-feira" },
-    { key: "saturday", label: "Sábado" },
-    { key: "sunday", label: "Domingo" }
+    { key: 1, label: "Segunda-feira" },
+    { key: 2, label: "Terça-feira" },
+    { key: 3, label: "Quarta-feira" },
+    { key: 4, label: "Quinta-feira" },
+    { key: 5, label: "Sexta-feira" },
+    { key: 6, label: "Sábado" },
+    { key: 0, label: "Domingo" }
   ];
 
   const saveAvailabilityBtn = el("saveAvailability");
@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     dias.forEach(dia => {
-      const item = data?.find(row => row.weekday === dia.key);
+      const item = data?.find(row => Number(row.weekday) === dia.key);
       const card = document.createElement("div");
       card.className = "availability-day";
       card.dataset.weekday = dia.key;
@@ -413,7 +413,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         rows.push({
           user_id: user.id,
-          weekday: card.dataset.weekday,
+          weekday: Number(card.dataset.weekday),
           open_time,
           close_time,
           chairs
