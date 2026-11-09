@@ -166,11 +166,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     el("backgroundStatus").textContent = "A imagem de fundo será removida ao salvar.";
   });
 
-  const usernameRaw = (profile.username || "").trim();
-  const safeUsername = encodeURIComponent(usernameRaw || "usuario");
+  // Domínio de produção do projeto Estétika na Vercel.
+  // Mantém o link público e o botão "Ver agendamento" apontando para o mesmo projeto.
+  const AGENDA_BASE_URL = "https://estetika-murex.vercel.app";
 
-  const fullLink =
-    `https://agenda-beleza-eta.vercel.app/agendamento.html?studio=${safeUsername}`;
+  const buildAgendaLink = (username) => {
+    const url = new URL("/agendamento.html", AGENDA_BASE_URL);
+    url.searchParams.set("studio", (username || "").trim() || "usuario");
+    return url.toString();
+  };
+
+  const usernameRaw = (profile.username || "").trim();
+  const fullLink = buildAgendaLink(usernameRaw);
 
   publicLink.innerHTML = `
     <a href="${fullLink}"
@@ -282,8 +289,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       removeLogoRequested = false;
       removeBackgroundRequested = false;
 
-      const updatedUsername = encodeURIComponent((username || "").trim() || "usuario");
-      const updatedLink = `https://agenda-beleza-eta.vercel.app/agendamento.html?studio=${updatedUsername}`;
+      const updatedLink = buildAgendaLink(username);
       publicLink.innerHTML = `<a href="${updatedLink}" target="_blank" class="text-[#A9A9A9] break-all font-semibold">${updatedLink}</a>`;
       el("abrirAgenda").onclick = () => window.open(updatedLink, "_blank");
       el("copiar").onclick = () => copyAgendaLink(updatedLink);
