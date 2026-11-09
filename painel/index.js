@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!user) {
 
     window.location.href =
-      "login.html";
+      "/login/";
 
     return;
   }
